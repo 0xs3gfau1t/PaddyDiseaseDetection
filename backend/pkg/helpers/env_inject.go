@@ -2,11 +2,9 @@ package helpers
 
 import (
 	"bufio"
-	"fmt"
+	"github.com/hashicorp/go-envparse"
 	"log"
 	"os"
-
-	"github.com/hashicorp/go-envparse"
 )
 
 func parseEnv(env_path string) (map[string]string, error) {
@@ -30,7 +28,6 @@ func InjectEnv(envPath string) {
 	varsMap, err := parseEnv(envPath)
 	if err == nil {
 		for k, v := range varsMap {
-			fmt.Println(v)
 			os.Setenv(k, v)
 		}
 	}

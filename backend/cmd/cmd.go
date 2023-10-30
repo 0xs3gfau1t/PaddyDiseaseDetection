@@ -11,6 +11,7 @@ func init(){
     // Eg: Migrations, Seeding, Testing commands
     //
     serverCmd,
+    migrateCmd,
   )
 }
 
