@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"segFault/PaddyDiseaseDetection/cmd"
+)
 
 func main() {
-	fmt.Println("Hello World!")
+  if err:=cmd.Execute();err!=nil{
+    log.Fatal(err)
+  }
 }
