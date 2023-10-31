@@ -1,10 +1,9 @@
 package server
 
 import (
-	"segFault/PaddyDiseaseDetection/pkg/server/api"
-
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"segFault/PaddyDiseaseDetection/pkg/server/api"
 )
 
 func Run(port string) error {
@@ -16,7 +15,7 @@ func Run(port string) error {
 	)
 
 	// Register /api routes
-        api.InitApiRoutes(e)
+	api.InitApiRoutes(e)
 
 	return e.Start(":" + port)
 }
