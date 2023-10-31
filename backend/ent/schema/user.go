@@ -14,8 +14,8 @@ func (User) Fields() []ent.Field{
   return []ent.Field{
     field.UUID("id", uuid.New()).Unique(),
     field.String("name"),
-    field.String("email"),
+    field.String("email").Unique(),
     field.String("location"),
-    field.String("coord"),
+    field.String("coord").Optional(),
   }
 }

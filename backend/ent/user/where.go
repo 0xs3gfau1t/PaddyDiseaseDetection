@@ -324,6 +324,16 @@ func CoordHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldCoord, v))
 }
 
+// CoordIsNil applies the IsNil predicate on the "coord" field.
+func CoordIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldCoord))
+}
+
+// CoordNotNil applies the NotNil predicate on the "coord" field.
+func CoordNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldCoord))
+}
+
 // CoordEqualFold applies the EqualFold predicate on the "coord" field.
 func CoordEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldCoord, v))

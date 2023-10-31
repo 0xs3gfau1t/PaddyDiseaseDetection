@@ -44,6 +44,14 @@ func (uc *UserCreate) SetCoord(s string) *UserCreate {
 	return uc
 }
 
+// SetNillableCoord sets the "coord" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCoord(s *string) *UserCreate {
+	if s != nil {
+		uc.SetCoord(*s)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	uc.mutation.SetID(u)
@@ -92,9 +100,6 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Location(); !ok {
 		return &ValidationError{Name: "location", err: errors.New(`ent: missing required field "User.location"`)}
-	}
-	if _, ok := uc.mutation.Coord(); !ok {
-		return &ValidationError{Name: "coord", err: errors.New(`ent: missing required field "User.coord"`)}
 	}
 	return nil
 }
