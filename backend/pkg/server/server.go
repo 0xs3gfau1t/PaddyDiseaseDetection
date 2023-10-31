@@ -16,7 +16,7 @@ func Run(port string) error {
 	)
 
 	// Register /api routes
-        api.InitApiRoutes(e)
+	api.InitApiRoutes(e)
 
 	return e.Start(":" + port)
 }
