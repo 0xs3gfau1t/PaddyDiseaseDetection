@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"os"
 	"segFault/PaddyDiseaseDetection/ent/migrate"
 	"segFault/PaddyDiseaseDetection/pkg/config"
 	"segFault/PaddyDiseaseDetection/pkg/helpers"
@@ -13,7 +12,7 @@ import (
 var migrateCmd = &cobra.Command{
 	Use:    "migrate",
 	Short:  "Apply database migrations veri hardlyy",
-	PreRun: func(cmd *cobra.Command, args []string) { helpers.InjectEnv(os.Getenv("LOCAL_ENV_PATH")) },
+	PreRun: func(cmd *cobra.Command, args []string) { helpers.InjectEnv() },
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client, err := config.NewDbClient()
 		defer client.Close()
