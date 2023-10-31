@@ -43,7 +43,7 @@ func Set(ctx context.Context, key string, value interface{}, expiry ...time.Dura
 func Get(ctx context.Context, key string, value interface{}, callback CacheMissResolverFn) error {
 	data, err := cache.rbd.Get(ctx, key).Bytes()
 
-	if err == redis.Nil {
+	if err == redis.Nil && callback != nil {
 		// If Cache miss run the callback function
 		newValue, err := callback(key)
 		if err != nil {
@@ -80,4 +80,8 @@ func Get(ctx context.Context, key string, value interface{}, callback CacheMissR
 	}
 
 	return nil
+}
+
+func Invalidate(ctx context.Context, key string) error {
+	return cache.rbd.Del(ctx, key).Err()
 }
