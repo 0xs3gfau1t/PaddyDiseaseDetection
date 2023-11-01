@@ -8,7 +8,7 @@ import (
 
 type Client struct {
 	db   *ent.Client
-	User User
+	User UserClient
 }
 
 func New() *Client {
@@ -18,7 +18,7 @@ func New() *Client {
 	}
 	return &Client{
 		db: dbClient,
-		User: user{
+		User: usercli{
 			db: dbClient.User,
 		},
 	}

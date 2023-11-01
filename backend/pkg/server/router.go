@@ -23,4 +23,5 @@ func InitApiRoutes(e *echo.Echo) {
 	})
 
 	e.POST("/api/auth/signup", handlers.SignUpHandler(cli))
+	e.POST("/api/auth/login", handlers.LoginHandler(cli))
 }
