@@ -27,8 +27,8 @@ func parseEnv(env_path string) (map[string]string, error) {
 func InjectEnv() {
 	envPath := os.Getenv("LOCAL_ENV_PATH")
 	if envPath == "" {
-		log.Println("No env file found. Make sure to set LOCAL_ENV_PATH env variable to apply.")
-		return
+		log.Println("No env file found. Make sure to set LOCAL_ENV_PATH explicitly if env file is other than .env")
+                envPath=".env"
 	}
 	varsMap, err := parseEnv(envPath)
 	if err == nil {
