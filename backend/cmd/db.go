@@ -53,6 +53,10 @@ var migrateReset = &cobra.Command{
 		// Upon creation of additional tables
 		// Add delete queries here
 
-		return migrateCmd.Execute()
+		return client.Debug().Schema.Create(
+			ctx,
+			migrate.WithDropIndex(true),
+			migrate.WithDropColumn(true),
+			migrate.WithForeignKeys(true))
 	},
 }
