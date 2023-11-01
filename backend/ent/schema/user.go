@@ -17,5 +17,6 @@ func (User) Fields() []ent.Field{
     field.String("email").Unique(),
     field.String("location"),
     field.String("coord").Optional(),
+    field.String("password"),
   }
 }
