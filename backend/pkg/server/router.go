@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"segFault/PaddyDiseaseDetection/pkg/client"
 	"segFault/PaddyDiseaseDetection/pkg/server/handlers"
+	middlewareslocal "segFault/PaddyDiseaseDetection/pkg/server/middlewares_local"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,4 +25,6 @@ func InitApiRoutes(e *echo.Echo) {
 
 	e.POST("/api/auth/signup", handlers.SignUpHandler(cli))
 	e.POST("/api/auth/login", handlers.LoginHandler(cli))
+	e.POST("/api/auth/logout", handlers.LogoutHandler(cli), middlewareslocal.JwtMiddleware)
+	// logout shouldn't be protected, remove this middleware later
 }

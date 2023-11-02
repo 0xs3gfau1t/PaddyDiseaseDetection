@@ -27,17 +27,21 @@ type LoginUserValidInput struct {
 	Password string `form:"password"`
 }
 
+type AuthenticatedUserRequestValues struct {
+	Email string `json:"email"`
+	Id    string `json:"id"`
+}
+
 type JwtType struct {
-	Id        string `json:"id"`
-	Email     string `json:"email"`
-	IssuedAt  string `json:"iat"`
-	ExpiresAt string `json:"exp"`
+	jwt.StandardClaims
+	AuthenticatedUserRequestValues
 }
 
 type UserClient interface {
 	UserDetails(id uuid.UUID) (*ent.User, error)
 	CreateUser(validatedUser *CreateUserValidInput) (*ent.User, error)
 	HashPassword(unhashed string) ([]byte, error)
+	CompareHashedPassword(unhashed string, hashed string) error
 	Login(validatedInput *LoginUserValidInput) (string, error)
 }
 
@@ -68,26 +72,35 @@ func (u usercli) CreateUser(validatedUser *CreateUserValidInput) (*ent.User, err
 func (u usercli) Login(validatedUser *LoginUserValidInput) (string, error) {
 	// ALTERNATIVE: Instead of first fetching and comparing,
 	// How about, fetching with hashed password?
+	// Also, we should use echo's context instead of background
 	userEntity, err := u.db.Query().Unique(true).Where(user.Email(validatedUser.Email)).Select(user.FieldPassword, user.FieldID, user.FieldEmail).First(context.Background())
 	if err != nil {
 		return "", err
 	}
 
 	// Check creds
-	err = bcrypt.CompareHashAndPassword([]byte(userEntity.Password), []byte(validatedUser.Password))
+	err = u.CompareHashedPassword(validatedUser.Password, userEntity.Password)
 	if err != nil {
 		return "", err
 	}
 
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.MapClaims{
-		"id":    userEntity.ID.String(),
-		"email": userEntity.Email,
-		"exp":   30 * 24 * 60 * 60 * 1000,
-		"iat":   time.Now().UnixMilli(),
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, &JwtType{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Unix() + 30*24*60*60,
+			IssuedAt:  time.Now().Unix(),
+		},
+		AuthenticatedUserRequestValues: AuthenticatedUserRequestValues{
+			Id:    userEntity.ID.String(),
+			Email: userEntity.Email,
+		},
 	},
 	).SignedString([]byte(os.Getenv("SIGNING_SECRET")))
 }
 
 func (u usercli) HashPassword(unhashed string) ([]byte, error) {
 	return bcrypt.GenerateFromPassword([]byte(unhashed), bcrypt.DefaultCost)
+}
+
+func (u usercli) CompareHashedPassword(unhashed string, hashed string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(unhashed))
 }

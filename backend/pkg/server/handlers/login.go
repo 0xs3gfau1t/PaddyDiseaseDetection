@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"segFault/PaddyDiseaseDetection/pkg/client"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,6 +20,12 @@ func LoginHandler(cli *client.Client) echo.HandlerFunc {
 			return err
 		}
 
+		c.SetCookie(&http.Cookie{
+			Name:     "accessToken",
+			Value:    jwt,
+			MaxAge:   int(time.Now().Unix()) + 30*24*60*60,
+			SameSite: http.SameSiteLaxMode,
+		})
 		return c.JSON(http.StatusOK, &LoginReturn{
 			AccessToken: jwt,
 		})
