@@ -44,6 +44,20 @@ func (uc *UserCreate) SetCoord(s string) *UserCreate {
 	return uc
 }
 
+// SetNillableCoord sets the "coord" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCoord(s *string) *UserCreate {
+	if s != nil {
+		uc.SetCoord(*s)
+	}
+	return uc
+}
+
+// SetPassword sets the "password" field.
+func (uc *UserCreate) SetPassword(s string) *UserCreate {
+	uc.mutation.SetPassword(s)
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	uc.mutation.SetID(u)
@@ -93,8 +107,8 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Location(); !ok {
 		return &ValidationError{Name: "location", err: errors.New(`ent: missing required field "User.location"`)}
 	}
-	if _, ok := uc.mutation.Coord(); !ok {
-		return &ValidationError{Name: "coord", err: errors.New(`ent: missing required field "User.coord"`)}
+	if _, ok := uc.mutation.Password(); !ok {
+		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
 	}
 	return nil
 }
@@ -146,6 +160,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Coord(); ok {
 		_spec.SetField(user.FieldCoord, field.TypeString, value)
 		_node.Coord = value
+	}
+	if value, ok := uc.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
+		_node.Password = value
 	}
 	return _node, _spec
 }

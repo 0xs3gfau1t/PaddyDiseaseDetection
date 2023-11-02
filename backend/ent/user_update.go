@@ -51,6 +51,26 @@ func (uu *UserUpdate) SetCoord(s string) *UserUpdate {
 	return uu
 }
 
+// SetNillableCoord sets the "coord" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableCoord(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetCoord(*s)
+	}
+	return uu
+}
+
+// ClearCoord clears the value of the "coord" field.
+func (uu *UserUpdate) ClearCoord() *UserUpdate {
+	uu.mutation.ClearCoord()
+	return uu
+}
+
+// SetPassword sets the "password" field.
+func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
+	uu.mutation.SetPassword(s)
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -104,6 +124,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Coord(); ok {
 		_spec.SetField(user.FieldCoord, field.TypeString, value)
 	}
+	if uu.mutation.CoordCleared() {
+		_spec.ClearField(user.FieldCoord, field.TypeString)
+	}
+	if value, ok := uu.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -145,6 +171,26 @@ func (uuo *UserUpdateOne) SetLocation(s string) *UserUpdateOne {
 // SetCoord sets the "coord" field.
 func (uuo *UserUpdateOne) SetCoord(s string) *UserUpdateOne {
 	uuo.mutation.SetCoord(s)
+	return uuo
+}
+
+// SetNillableCoord sets the "coord" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableCoord(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetCoord(*s)
+	}
+	return uuo
+}
+
+// ClearCoord clears the value of the "coord" field.
+func (uuo *UserUpdateOne) ClearCoord() *UserUpdateOne {
+	uuo.mutation.ClearCoord()
+	return uuo
+}
+
+// SetPassword sets the "password" field.
+func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
+	uuo.mutation.SetPassword(s)
 	return uuo
 }
 
@@ -230,6 +276,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.Coord(); ok {
 		_spec.SetField(user.FieldCoord, field.TypeString, value)
+	}
+	if uuo.mutation.CoordCleared() {
+		_spec.ClearField(user.FieldCoord, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

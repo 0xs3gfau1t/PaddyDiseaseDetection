@@ -8,3 +8,15 @@ go run . server
 
 1. Install air `go install github.com/cosmtrek/air@latest`
 2. Start the server with air `air server`
+
+## Migrations
+
+```bash
+go run . migrate
+```
+
+### Reset then migrate
+
+```bash
+go run . migrate reset
+```
