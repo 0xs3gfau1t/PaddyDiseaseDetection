@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"segFault/PaddyDiseaseDetection/pkg/client"
 	"segFault/PaddyDiseaseDetection/pkg/server/handlers"
 	middlewareslocal "segFault/PaddyDiseaseDetection/pkg/server/middlewares_local"
 
@@ -14,8 +13,6 @@ type HomeResponse struct {
 }
 
 func InitApiRoutes(e *echo.Echo) {
-	cli := client.New()
-
 	e.GET("/api", func(c echo.Context) error {
 		res := &HomeResponse{
 			Message: "Oniiii san, you hit a kawaiii endpoint.",
@@ -23,8 +20,8 @@ func InitApiRoutes(e *echo.Echo) {
 		return c.JSONPretty(http.StatusOK, res, " ")
 	})
 
-	e.POST("/api/auth/signup", handlers.SignUpHandler(cli))
-	e.POST("/api/auth/login", handlers.LoginHandler(cli))
-	e.POST("/api/auth/logout", handlers.LogoutHandler(cli), middlewareslocal.JwtMiddleware)
+	e.POST("/api/auth/signup", handlers.SignUpHandler)
+	e.POST("/api/auth/login", handlers.LoginHandler)
+	e.POST("/api/auth/logout", handlers.LogoutHander, middlewareslocal.JwtMiddleware)
 	// logout shouldn't be protected, remove this middleware later
 }

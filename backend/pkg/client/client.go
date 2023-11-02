@@ -11,6 +11,12 @@ type Client struct {
 	User UserClient
 }
 
+var Cli *Client
+
+func init() {
+	Cli = New()
+}
+
 func New() *Client {
 	dbClient, err := config.NewDbClient()
 	if err != nil {
