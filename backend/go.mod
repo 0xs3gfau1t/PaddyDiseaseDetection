@@ -4,6 +4,7 @@ go 1.21.3
 
 require (
 	entgo.io/ent v0.12.4
+	github.com/barasher/go-exiftool v1.10.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.4.0
 	github.com/hashicorp/go-envparse v0.1.0
