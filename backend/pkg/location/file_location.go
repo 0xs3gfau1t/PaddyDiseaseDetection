@@ -10,7 +10,7 @@ import (
 )
 
 type LocationExtractorFromFile struct {
-	File []byte
+	File *[]byte
 }
 
 func (le *LocationExtractorFromFile) GetLocation() (Location, Location, error) {
@@ -24,7 +24,7 @@ func (le *LocationExtractorFromFile) GetLocation() (Location, Location, error) {
 	defer tmpFile.Close()
 	defer os.Remove(filename)
 
-	if _, err := tmpFile.Write(le.File); err != nil {
+	if _, err := tmpFile.Write(*le.File); err != nil {
 		return emptyLocation, emptyLocation, fmt.Errorf("Failed to write data to temp file:%w", err)
 	}
 
