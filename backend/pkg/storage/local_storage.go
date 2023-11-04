@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -46,4 +47,20 @@ func (fs *LocalStorage) RemoveFile(filename string) error {
 	filepath := path.Join(fs.rootFolder, filename)
 
 	return os.Remove(filepath)
+}
+
+func (fs *LocalStorage) GetFileByte(filename string) ([]byte, error) {
+	filepath := path.Join(fs.rootFolder, filename)
+
+	f, err := os.Open(filepath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to open file:%w", err)
+	}
+	defer f.Close()
+
+	return io.ReadAll(f)
+}
+
+func (fs *LocalStorage) GetFilePath(filename string) (string, error) {
+	return path.Join(fs.rootFolder, filename), nil
 }
