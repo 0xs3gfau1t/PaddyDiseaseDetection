@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-	"segFault/PaddyDiseaseDetection/pkg/helpers"
 	"segFault/PaddyDiseaseDetection/pkg/server"
 
 	"github.com/spf13/cobra"
@@ -15,8 +13,7 @@ func init() {
 }
 
 var serverCmd = &cobra.Command{
-	Use:    "server",
-	Short:  "Starts the backend server",
-	PreRun: func(cmd *cobra.Command, args []string) { helpers.InjectEnv(os.Getenv("LOCAL_ENV_PATH")) },
-	RunE:   func(cmd *cobra.Command, args []string) error { return server.Run(serverPort) },
+	Use:   "server",
+	Short: "Starts the backend server",
+	RunE:  func(cmd *cobra.Command, args []string) error { return server.Run(serverPort) },
 }

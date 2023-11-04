@@ -19,6 +19,8 @@ const (
 	FieldLocation = "location"
 	// FieldCoord holds the string denoting the coord field in the database.
 	FieldCoord = "coord"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -30,6 +32,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldLocation,
 	FieldCoord,
+	FieldPassword,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,4 +71,9 @@ func ByLocation(opts ...sql.OrderTermOption) OrderOption {
 // ByCoord orders the results by the coord field.
 func ByCoord(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCoord, opts...).ToFunc()
+}
+
+// ByPassword orders the results by the password field.
+func ByPassword(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }

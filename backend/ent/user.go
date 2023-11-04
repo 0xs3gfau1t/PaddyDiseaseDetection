@@ -24,7 +24,9 @@ type User struct {
 	// Location holds the value of the "location" field.
 	Location string `json:"location,omitempty"`
 	// Coord holds the value of the "coord" field.
-	Coord        string `json:"coord,omitempty"`
+	Coord string `json:"coord,omitempty"`
+	// Password holds the value of the "password" field.
+	Password     string `json:"password,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -33,7 +35,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldName, user.FieldEmail, user.FieldLocation, user.FieldCoord:
+		case user.FieldName, user.FieldEmail, user.FieldLocation, user.FieldCoord, user.FieldPassword:
 			values[i] = new(sql.NullString)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
@@ -82,6 +84,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Coord = value.String
 			}
+		case user.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				u.Password = value.String
+			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
 		}
@@ -129,6 +137,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("coord=")
 	builder.WriteString(u.Coord)
+	builder.WriteString(", ")
+	builder.WriteString("password=")
+	builder.WriteString(u.Password)
 	builder.WriteByte(')')
 	return builder.String()
 }

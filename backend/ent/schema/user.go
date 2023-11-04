@@ -7,15 +7,16 @@ import (
 )
 
 type User struct {
-  ent.Schema
+	ent.Schema
 }
 
-func (User) Fields() []ent.Field{
-  return []ent.Field{
-    field.UUID("id", uuid.New()).Unique(),
-    field.String("name"),
-    field.String("email"),
-    field.String("location"),
-    field.String("coord"),
-  }
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("id", uuid.New()).Unique(),
+		field.String("name"),
+		field.String("email").Unique(),
+		field.String("location"),
+		field.String("coord").Optional(),
+		field.String("password"),
+	}
 }
