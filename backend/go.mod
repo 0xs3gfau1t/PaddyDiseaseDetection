@@ -11,6 +11,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.2.1
 	github.com/spf13/cobra v1.7.0
+	github.com/supabase-community/storage-go v0.7.0
 	golang.org/x/crypto v0.14.0
 )
 
