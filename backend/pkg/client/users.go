@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"log"
 	"os"
 	"segFault/PaddyDiseaseDetection/ent"
 	"segFault/PaddyDiseaseDetection/ent/user"
@@ -16,11 +17,12 @@ import (
 )
 
 type UserClient interface {
-	UserDetails(id uuid.UUID) (*ent.User, error)
-	CreateUser(validatedUser *types.CreateUserValidInput) (*ent.User, error)
-	HashPassword(unhashed string) ([]byte, error)
-	CompareHashedPassword(unhashed string, hashed string) error
-	Login(validatedInput *types.LoginUserValidInput) (string, error)
+	UserDetails(uuid.UUID) (*ent.User, error)
+	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
+	HashPassword(string) ([]byte, error)
+	CompareHashedPassword(string, string) error
+	Login(*types.LoginUserValidInput) (string, error)
+	UploadImage(*types.ImageUploadType, string) error
 }
 
 type usercli struct {
@@ -78,4 +80,8 @@ func (u usercli) HashPassword(unhashed string) ([]byte, error) {
 
 func (u usercli) CompareHashedPassword(unhashed string, hashed string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(unhashed))
+}
+
+func (u usercli) UploadImage(images *types.ImageUploadType, userId string) error {
+	return nil
 }
