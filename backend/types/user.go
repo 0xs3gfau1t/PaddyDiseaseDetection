@@ -1,6 +1,10 @@
 package types
 
-import "github.com/golang-jwt/jwt"
+import (
+	"mime/multipart"
+
+	"github.com/golang-jwt/jwt"
+)
 
 type CreateUserValidInput struct {
 	Name     string `form:"name"`
@@ -23,4 +27,8 @@ type AuthenticatedUserRequestValues struct {
 type JwtType struct {
 	jwt.StandardClaims
 	AuthenticatedUserRequestValues
+}
+
+type ImageUploadType struct {
+	Images []*multipart.FileHeader `json:"images"`
 }
