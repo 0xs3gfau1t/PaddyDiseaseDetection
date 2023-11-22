@@ -7,6 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"segFault/PaddyDiseaseDetection/ent/disease"
+	"segFault/PaddyDiseaseDetection/ent/diseaseidentified"
+	"segFault/PaddyDiseaseDetection/ent/image"
+	"segFault/PaddyDiseaseDetection/ent/solution"
 	"segFault/PaddyDiseaseDetection/ent/user"
 	"sync"
 
@@ -73,7 +77,11 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			user.Table: user.ValidColumn,
+			disease.Table:           disease.ValidColumn,
+			diseaseidentified.Table: diseaseidentified.ValidColumn,
+			image.Table:             image.ValidColumn,
+			solution.Table:          solution.ValidColumn,
+			user.Table:              user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

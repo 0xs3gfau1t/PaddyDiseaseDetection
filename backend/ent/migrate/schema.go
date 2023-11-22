@@ -8,6 +8,59 @@ import (
 )
 
 var (
+	// DiseasesColumns holds the columns for the "diseases" table.
+	DiseasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "photos", Type: field.TypeJSON},
+	}
+	// DiseasesTable holds the schema information for the "diseases" table.
+	DiseasesTable = &schema.Table{
+		Name:       "diseases",
+		Columns:    DiseasesColumns,
+		PrimaryKey: []*schema.Column{DiseasesColumns[0]},
+	}
+	// DiseaseIdentifiedsColumns holds the columns for the "disease_identifieds" table.
+	DiseaseIdentifiedsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "location", Type: field.TypeString},
+		{Name: "severity", Type: field.TypeInt},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "photos", Type: field.TypeJSON},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"processing", "processed", "queued", "failed"}},
+	}
+	// DiseaseIdentifiedsTable holds the schema information for the "disease_identifieds" table.
+	DiseaseIdentifiedsTable = &schema.Table{
+		Name:       "disease_identifieds",
+		Columns:    DiseaseIdentifiedsColumns,
+		PrimaryKey: []*schema.Column{DiseaseIdentifiedsColumns[0]},
+	}
+	// ImagesColumns holds the columns for the "images" table.
+	ImagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "identifier", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// ImagesTable holds the schema information for the "images" table.
+	ImagesTable = &schema.Table{
+		Name:       "images",
+		Columns:    ImagesColumns,
+		PrimaryKey: []*schema.Column{ImagesColumns[0]},
+	}
+	// SolutionsColumns holds the columns for the "solutions" table.
+	SolutionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "photos", Type: field.TypeJSON},
+		{Name: "description", Type: field.TypeString},
+		{Name: "ingredients", Type: field.TypeJSON},
+	}
+	// SolutionsTable holds the schema information for the "solutions" table.
+	SolutionsTable = &schema.Table{
+		Name:       "solutions",
+		Columns:    SolutionsColumns,
+		PrimaryKey: []*schema.Column{SolutionsColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -23,11 +76,99 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// DiseaseSolutionsColumns holds the columns for the "disease_solutions" table.
+	DiseaseSolutionsColumns = []*schema.Column{
+		{Name: "disease_id", Type: field.TypeUUID},
+		{Name: "solution_id", Type: field.TypeUUID},
+	}
+	// DiseaseSolutionsTable holds the schema information for the "disease_solutions" table.
+	DiseaseSolutionsTable = &schema.Table{
+		Name:       "disease_solutions",
+		Columns:    DiseaseSolutionsColumns,
+		PrimaryKey: []*schema.Column{DiseaseSolutionsColumns[0], DiseaseSolutionsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "disease_solutions_disease_id",
+				Columns:    []*schema.Column{DiseaseSolutionsColumns[0]},
+				RefColumns: []*schema.Column{DiseasesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "disease_solutions_solution_id",
+				Columns:    []*schema.Column{DiseaseSolutionsColumns[1]},
+				RefColumns: []*schema.Column{SolutionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// DiseaseIdentifiedDiseaseColumns holds the columns for the "disease_identified_disease" table.
+	DiseaseIdentifiedDiseaseColumns = []*schema.Column{
+		{Name: "disease_identified_id", Type: field.TypeUUID},
+		{Name: "disease_id", Type: field.TypeUUID},
+	}
+	// DiseaseIdentifiedDiseaseTable holds the schema information for the "disease_identified_disease" table.
+	DiseaseIdentifiedDiseaseTable = &schema.Table{
+		Name:       "disease_identified_disease",
+		Columns:    DiseaseIdentifiedDiseaseColumns,
+		PrimaryKey: []*schema.Column{DiseaseIdentifiedDiseaseColumns[0], DiseaseIdentifiedDiseaseColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "disease_identified_disease_disease_identified_id",
+				Columns:    []*schema.Column{DiseaseIdentifiedDiseaseColumns[0]},
+				RefColumns: []*schema.Column{DiseaseIdentifiedsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "disease_identified_disease_disease_id",
+				Columns:    []*schema.Column{DiseaseIdentifiedDiseaseColumns[1]},
+				RefColumns: []*schema.Column{DiseasesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// UserDiseaseIdentifiedColumns holds the columns for the "user_disease_identified" table.
+	UserDiseaseIdentifiedColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeUUID},
+		{Name: "disease_identified_id", Type: field.TypeUUID},
+	}
+	// UserDiseaseIdentifiedTable holds the schema information for the "user_disease_identified" table.
+	UserDiseaseIdentifiedTable = &schema.Table{
+		Name:       "user_disease_identified",
+		Columns:    UserDiseaseIdentifiedColumns,
+		PrimaryKey: []*schema.Column{UserDiseaseIdentifiedColumns[0], UserDiseaseIdentifiedColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_disease_identified_user_id",
+				Columns:    []*schema.Column{UserDiseaseIdentifiedColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_disease_identified_disease_identified_id",
+				Columns:    []*schema.Column{UserDiseaseIdentifiedColumns[1]},
+				RefColumns: []*schema.Column{DiseaseIdentifiedsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		DiseasesTable,
+		DiseaseIdentifiedsTable,
+		ImagesTable,
+		SolutionsTable,
 		UsersTable,
+		DiseaseSolutionsTable,
+		DiseaseIdentifiedDiseaseTable,
+		UserDiseaseIdentifiedTable,
 	}
 )
 
 func init() {
+	DiseaseSolutionsTable.ForeignKeys[0].RefTable = DiseasesTable
+	DiseaseSolutionsTable.ForeignKeys[1].RefTable = SolutionsTable
+	DiseaseIdentifiedDiseaseTable.ForeignKeys[0].RefTable = DiseaseIdentifiedsTable
+	DiseaseIdentifiedDiseaseTable.ForeignKeys[1].RefTable = DiseasesTable
+	UserDiseaseIdentifiedTable.ForeignKeys[0].RefTable = UsersTable
+	UserDiseaseIdentifiedTable.ForeignKeys[1].RefTable = DiseaseIdentifiedsTable
 }

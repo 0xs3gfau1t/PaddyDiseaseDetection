@@ -26,8 +26,29 @@ type User struct {
 	// Coord holds the value of the "coord" field.
 	Coord string `json:"coord,omitempty"`
 	// Password holds the value of the "password" field.
-	Password     string `json:"password,omitempty"`
+	Password string `json:"password,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges        UserEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// DiseaseIdentified holds the value of the disease_identified edge.
+	DiseaseIdentified []*DiseaseIdentified `json:"disease_identified,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// DiseaseIdentifiedOrErr returns the DiseaseIdentified value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DiseaseIdentifiedOrErr() ([]*DiseaseIdentified, error) {
+	if e.loadedTypes[0] {
+		return e.DiseaseIdentified, nil
+	}
+	return nil, &NotLoadedError{edge: "disease_identified"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -101,6 +122,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
+}
+
+// QueryDiseaseIdentified queries the "disease_identified" edge of the User entity.
+func (u *User) QueryDiseaseIdentified() *DiseaseIdentifiedQuery {
+	return NewUserClient(u.config).QueryDiseaseIdentified(u)
 }
 
 // Update returns a builder for updating this User.

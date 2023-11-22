@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -18,5 +19,11 @@ func (User) Fields() []ent.Field {
 		field.String("location"),
 		field.String("coord").Optional(),
 		field.String("password"),
+	}
+}
+
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("disease_identified", DiseaseIdentified.Type),
 	}
 }

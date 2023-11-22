@@ -8,6 +8,54 @@ import (
 	"segFault/PaddyDiseaseDetection/ent"
 )
 
+// The DiseaseFunc type is an adapter to allow the use of ordinary
+// function as Disease mutator.
+type DiseaseFunc func(context.Context, *ent.DiseaseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DiseaseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DiseaseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiseaseMutation", m)
+}
+
+// The DiseaseIdentifiedFunc type is an adapter to allow the use of ordinary
+// function as DiseaseIdentified mutator.
+type DiseaseIdentifiedFunc func(context.Context, *ent.DiseaseIdentifiedMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DiseaseIdentifiedFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DiseaseIdentifiedMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiseaseIdentifiedMutation", m)
+}
+
+// The ImageFunc type is an adapter to allow the use of ordinary
+// function as Image mutator.
+type ImageFunc func(context.Context, *ent.ImageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ImageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ImageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ImageMutation", m)
+}
+
+// The SolutionFunc type is an adapter to allow the use of ordinary
+// function as Solution mutator.
+type SolutionFunc func(context.Context, *ent.SolutionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SolutionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.SolutionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SolutionMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
