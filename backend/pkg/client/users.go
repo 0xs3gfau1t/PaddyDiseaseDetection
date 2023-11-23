@@ -21,7 +21,6 @@ type UserClient interface {
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
 	Login(*types.LoginUserValidInput) (string, error)
-	UploadImage(*types.ImageUploadType, string) error
 }
 
 type usercli struct {
@@ -79,8 +78,4 @@ func (u usercli) HashPassword(unhashed string) ([]byte, error) {
 
 func (u usercli) CompareHashedPassword(unhashed string, hashed string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(unhashed))
-}
-
-func (u usercli) UploadImage(images *types.ImageUploadType, userId string) error {
-	return nil
 }

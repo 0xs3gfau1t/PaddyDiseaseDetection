@@ -9,9 +9,9 @@ import (
 )
 
 type Client struct {
-	db      *ent.Client
-	User    UserClient
-	Storage storage.Storage
+	db                 *ent.Client
+	User               UserClient
+	IdentifiedDiseases IdentifiedDiseasesClient
 }
 
 var Cli *Client
@@ -22,6 +22,8 @@ func init() {
 
 func New() *Client {
 	dbClient, err := config.NewDbClient()
+	storageAdapter := storage.NewSupaBaseStorage(os.Getenv("SUPABASE_CONN_STRING"), os.Getenv("SUPABASE_KEY"), os.Getenv("IMAGE_BUCKET"))
+	log.Println(storageAdapter.Client)
 	if err != nil {
 		log.Fatal("Couldn't initialize a database client")
 	}
@@ -31,9 +33,9 @@ func New() *Client {
 		User: usercli{
 			db: dbClient.User,
 		},
-		Storage: &storage.SupaBaseStorage{
-			Client: config.NewSupabaseClient(),
-			Bucket: os.Getenv("IMAGE_BUCKET"),
+		IdentifiedDiseases: IdentifiedDiseases{
+			db:      dbClient.DiseaseIdentified,
+			storage: storageAdapter,
 		},
 	}
 }

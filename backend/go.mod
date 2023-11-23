@@ -6,6 +6,7 @@ require (
 	entgo.io/ent v0.12.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.4.0
+	github.com/h2non/filetype v1.1.3
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/lib/pq v1.10.9

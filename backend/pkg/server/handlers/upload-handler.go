@@ -22,15 +22,15 @@ func UploadHandler(c echo.Context) error {
 
 	form, err := c.MultipartForm()
 	if err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return c.JSONBlob(http.StatusBadRequest, []byte(err.Error()))
 	}
 
 	images := types.ImageUploadType{
 		Images: form.File["images"],
 	}
 
-	if err := client.Cli.User.UploadImage(&images, user.Id); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+	if err := client.Cli.IdentifiedDiseases.UploadImages(&images, user.Id); err != nil {
+		return c.JSONBlob(http.StatusInternalServerError, []byte(err.Error()))
 	}
 	return nil
 }

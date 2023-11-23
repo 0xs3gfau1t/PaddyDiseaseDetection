@@ -24,5 +24,4 @@ func InitApiRoutes(e *echo.Echo) {
 	e.POST("/api/auth/login", handlers.LoginHandler)
 	e.POST("/api/auth/logout", handlers.LogoutHander)
 	e.POST("/api/upload", handlers.UploadHandler, middlewareslocal.JwtMiddleware)
-	// logout shouldn't be protected, remove this middleware later
 }
