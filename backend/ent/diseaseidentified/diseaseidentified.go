@@ -25,17 +25,19 @@ const (
 	FieldPhotos = "photos"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// EdgeUplodedBy holds the string denoting the uploded_by edge name in mutations.
-	EdgeUplodedBy = "uploded_by"
+	// EdgeUploadedBy holds the string denoting the uploaded_by edge name in mutations.
+	EdgeUploadedBy = "uploaded_by"
 	// EdgeDisease holds the string denoting the disease edge name in mutations.
 	EdgeDisease = "disease"
 	// Table holds the table name of the diseaseidentified in the database.
 	Table = "disease_identifieds"
-	// UplodedByTable is the table that holds the uploded_by relation/edge. The primary key declared below.
-	UplodedByTable = "user_disease_identified"
-	// UplodedByInverseTable is the table name for the User entity.
+	// UploadedByTable is the table that holds the uploaded_by relation/edge.
+	UploadedByTable = "disease_identifieds"
+	// UploadedByInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UplodedByInverseTable = "users"
+	UploadedByInverseTable = "users"
+	// UploadedByColumn is the table column denoting the uploaded_by relation/edge.
+	UploadedByColumn = "disease_identified_uploaded_by"
 	// DiseaseTable is the table that holds the disease relation/edge. The primary key declared below.
 	DiseaseTable = "disease_identified_disease"
 	// DiseaseInverseTable is the table name for the Disease entity.
@@ -53,10 +55,13 @@ var Columns = []string{
 	FieldStatus,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "disease_identifieds"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"disease_identified_uploaded_by",
+}
+
 var (
-	// UplodedByPrimaryKey and UplodedByColumn2 are the table columns denoting the
-	// primary key for the uploded_by relation (M2M).
-	UplodedByPrimaryKey = []string{"user_id", "disease_identified_id"}
 	// DiseasePrimaryKey and DiseaseColumn2 are the table columns denoting the
 	// primary key for the disease relation (M2M).
 	DiseasePrimaryKey = []string{"disease_identified_id", "disease_id"}
@@ -69,10 +74,17 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
+	// DefaultSeverity holds the default value on creation for the "severity" field.
+	DefaultSeverity int
 	// SeverityValidator is a validator for the "severity" field. It is called by the builders before save.
 	SeverityValidator func(int) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -81,6 +93,9 @@ var (
 
 // Status defines the type for the "status" enum field.
 type Status string
+
+// StatusQueued is the default value of the Status enum.
+const DefaultStatus = StatusQueued
 
 // Status values.
 const (
@@ -132,17 +147,10 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
-// ByUplodedByCount orders the results by uploded_by count.
-func ByUplodedByCount(opts ...sql.OrderTermOption) OrderOption {
+// ByUploadedByField orders the results by uploaded_by field.
+func ByUploadedByField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUplodedByStep(), opts...)
-	}
-}
-
-// ByUplodedBy orders the results by uploded_by terms.
-func ByUplodedBy(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUplodedByStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newUploadedByStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -159,11 +167,11 @@ func ByDisease(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newDiseaseStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newUplodedByStep() *sqlgraph.Step {
+func newUploadedByStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UplodedByInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, UplodedByTable, UplodedByPrimaryKey...),
+		sqlgraph.To(UploadedByInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, UploadedByTable, UploadedByColumn),
 	)
 }
 func newDiseaseStep() *sqlgraph.Step {

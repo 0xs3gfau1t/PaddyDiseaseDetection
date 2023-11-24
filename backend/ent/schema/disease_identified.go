@@ -17,15 +17,15 @@ func (DiseaseIdentified) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.New()).Unique(),
 		field.String("location"),
-		field.Int("severity").Range(1, 10),
+		field.Int("severity").Range(1, 10).Default(1),
 		field.Time("created_at").Default(time.Now),
 		field.Strings("photos"),
-		field.Enum("status").Values("processing", "processed", "queued", "failed"),
+		field.Enum("status").Values("processing", "processed", "queued", "failed").Default("queued"),
 	}
 }
 func (DiseaseIdentified) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("uploded_by", User.Type).Ref("disease_identified"),
+		edge.To("uploaded_by", User.Type).Unique().Required(),
 		edge.To("disease", Disease.Type),
 	}
 }

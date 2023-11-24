@@ -22,15 +22,17 @@ const (
 	FieldCoord = "coord"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
-	// EdgeDiseaseIdentified holds the string denoting the disease_identified edge name in mutations.
-	EdgeDiseaseIdentified = "disease_identified"
+	// EdgeDiseasesIdentified holds the string denoting the diseases_identified edge name in mutations.
+	EdgeDiseasesIdentified = "diseases_identified"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// DiseaseIdentifiedTable is the table that holds the disease_identified relation/edge. The primary key declared below.
-	DiseaseIdentifiedTable = "user_disease_identified"
-	// DiseaseIdentifiedInverseTable is the table name for the DiseaseIdentified entity.
+	// DiseasesIdentifiedTable is the table that holds the diseases_identified relation/edge.
+	DiseasesIdentifiedTable = "disease_identifieds"
+	// DiseasesIdentifiedInverseTable is the table name for the DiseaseIdentified entity.
 	// It exists in this package in order to avoid circular dependency with the "diseaseidentified" package.
-	DiseaseIdentifiedInverseTable = "disease_identifieds"
+	DiseasesIdentifiedInverseTable = "disease_identifieds"
+	// DiseasesIdentifiedColumn is the table column denoting the diseases_identified relation/edge.
+	DiseasesIdentifiedColumn = "disease_identified_uploaded_by"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -42,12 +44,6 @@ var Columns = []string{
 	FieldCoord,
 	FieldPassword,
 }
-
-var (
-	// DiseaseIdentifiedPrimaryKey and DiseaseIdentifiedColumn2 are the table columns denoting the
-	// primary key for the disease_identified relation (M2M).
-	DiseaseIdentifiedPrimaryKey = []string{"user_id", "disease_identified_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -92,23 +88,23 @@ func ByPassword(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
-// ByDiseaseIdentifiedCount orders the results by disease_identified count.
-func ByDiseaseIdentifiedCount(opts ...sql.OrderTermOption) OrderOption {
+// ByDiseasesIdentifiedCount orders the results by diseases_identified count.
+func ByDiseasesIdentifiedCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newDiseaseIdentifiedStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newDiseasesIdentifiedStep(), opts...)
 	}
 }
 
-// ByDiseaseIdentified orders the results by disease_identified terms.
-func ByDiseaseIdentified(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByDiseasesIdentified orders the results by diseases_identified terms.
+func ByDiseasesIdentified(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newDiseaseIdentifiedStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newDiseasesIdentifiedStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newDiseaseIdentifiedStep() *sqlgraph.Step {
+func newDiseasesIdentifiedStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(DiseaseIdentifiedInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, DiseaseIdentifiedTable, DiseaseIdentifiedPrimaryKey...),
+		sqlgraph.To(DiseasesIdentifiedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, DiseasesIdentifiedTable, DiseasesIdentifiedColumn),
 	)
 }

@@ -17,6 +17,8 @@ func init() {
 	_ = diseaseidentifiedFields
 	// diseaseidentifiedDescSeverity is the schema descriptor for severity field.
 	diseaseidentifiedDescSeverity := diseaseidentifiedFields[2].Descriptor()
+	// diseaseidentified.DefaultSeverity holds the default value on creation for the severity field.
+	diseaseidentified.DefaultSeverity = diseaseidentifiedDescSeverity.Default.(int)
 	// diseaseidentified.SeverityValidator is a validator for the "severity" field. It is called by the builders before save.
 	diseaseidentified.SeverityValidator = diseaseidentifiedDescSeverity.Validators[0].(func(int) error)
 	// diseaseidentifiedDescCreatedAt is the schema descriptor for created_at field.

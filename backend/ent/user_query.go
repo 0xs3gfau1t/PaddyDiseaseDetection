@@ -20,11 +20,11 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []user.OrderOption
-	inters                []Interceptor
-	predicates            []predicate.User
-	withDiseaseIdentified *DiseaseIdentifiedQuery
+	ctx                    *QueryContext
+	order                  []user.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.User
+	withDiseasesIdentified *DiseaseIdentifiedQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,8 +61,8 @@ func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	return uq
 }
 
-// QueryDiseaseIdentified chains the current query on the "disease_identified" edge.
-func (uq *UserQuery) QueryDiseaseIdentified() *DiseaseIdentifiedQuery {
+// QueryDiseasesIdentified chains the current query on the "diseases_identified" edge.
+func (uq *UserQuery) QueryDiseasesIdentified() *DiseaseIdentifiedQuery {
 	query := (&DiseaseIdentifiedClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -75,7 +75,7 @@ func (uq *UserQuery) QueryDiseaseIdentified() *DiseaseIdentifiedQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(diseaseidentified.Table, diseaseidentified.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.DiseaseIdentifiedTable, user.DiseaseIdentifiedPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.DiseasesIdentifiedTable, user.DiseasesIdentifiedColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,26 +270,26 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:                uq.config,
-		ctx:                   uq.ctx.Clone(),
-		order:                 append([]user.OrderOption{}, uq.order...),
-		inters:                append([]Interceptor{}, uq.inters...),
-		predicates:            append([]predicate.User{}, uq.predicates...),
-		withDiseaseIdentified: uq.withDiseaseIdentified.Clone(),
+		config:                 uq.config,
+		ctx:                    uq.ctx.Clone(),
+		order:                  append([]user.OrderOption{}, uq.order...),
+		inters:                 append([]Interceptor{}, uq.inters...),
+		predicates:             append([]predicate.User{}, uq.predicates...),
+		withDiseasesIdentified: uq.withDiseasesIdentified.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
 }
 
-// WithDiseaseIdentified tells the query-builder to eager-load the nodes that are connected to
-// the "disease_identified" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithDiseaseIdentified(opts ...func(*DiseaseIdentifiedQuery)) *UserQuery {
+// WithDiseasesIdentified tells the query-builder to eager-load the nodes that are connected to
+// the "diseases_identified" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithDiseasesIdentified(opts ...func(*DiseaseIdentifiedQuery)) *UserQuery {
 	query := (&DiseaseIdentifiedClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withDiseaseIdentified = query
+	uq.withDiseasesIdentified = query
 	return uq
 }
 
@@ -372,7 +372,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
 		loadedTypes = [1]bool{
-			uq.withDiseaseIdentified != nil,
+			uq.withDiseasesIdentified != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -393,74 +393,46 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := uq.withDiseaseIdentified; query != nil {
-		if err := uq.loadDiseaseIdentified(ctx, query, nodes,
-			func(n *User) { n.Edges.DiseaseIdentified = []*DiseaseIdentified{} },
-			func(n *User, e *DiseaseIdentified) { n.Edges.DiseaseIdentified = append(n.Edges.DiseaseIdentified, e) }); err != nil {
+	if query := uq.withDiseasesIdentified; query != nil {
+		if err := uq.loadDiseasesIdentified(ctx, query, nodes,
+			func(n *User) { n.Edges.DiseasesIdentified = []*DiseaseIdentified{} },
+			func(n *User, e *DiseaseIdentified) {
+				n.Edges.DiseasesIdentified = append(n.Edges.DiseasesIdentified, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (uq *UserQuery) loadDiseaseIdentified(ctx context.Context, query *DiseaseIdentifiedQuery, nodes []*User, init func(*User), assign func(*User, *DiseaseIdentified)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[uuid.UUID]*User)
-	nids := make(map[uuid.UUID]map[*User]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
+func (uq *UserQuery) loadDiseasesIdentified(ctx context.Context, query *DiseaseIdentifiedQuery, nodes []*User, init func(*User), assign func(*User, *DiseaseIdentified)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 		if init != nil {
-			init(node)
+			init(nodes[i])
 		}
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(user.DiseaseIdentifiedTable)
-		s.Join(joinT).On(s.C(diseaseidentified.FieldID), joinT.C(user.DiseaseIdentifiedPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(user.DiseaseIdentifiedPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.DiseaseIdentifiedPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(uuid.UUID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := *values[0].(*uuid.UUID)
-				inValue := *values[1].(*uuid.UUID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*DiseaseIdentified](ctx, query, qr, query.inters)
+	query.withFKs = true
+	query.Where(predicate.DiseaseIdentified(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.DiseasesIdentifiedColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.disease_identified_uploaded_by
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "disease_identified_uploaded_by" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "disease_identified" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "disease_identified_uploaded_by" returned %v for node %v`, *fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

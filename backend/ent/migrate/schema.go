@@ -24,16 +24,25 @@ var (
 	DiseaseIdentifiedsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "location", Type: field.TypeString},
-		{Name: "severity", Type: field.TypeInt},
+		{Name: "severity", Type: field.TypeInt, Default: 1},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "photos", Type: field.TypeJSON},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"processing", "processed", "queued", "failed"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"processing", "processed", "queued", "failed"}, Default: "queued"},
+		{Name: "disease_identified_uploaded_by", Type: field.TypeUUID},
 	}
 	// DiseaseIdentifiedsTable holds the schema information for the "disease_identifieds" table.
 	DiseaseIdentifiedsTable = &schema.Table{
 		Name:       "disease_identifieds",
 		Columns:    DiseaseIdentifiedsColumns,
 		PrimaryKey: []*schema.Column{DiseaseIdentifiedsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "disease_identifieds_users_uploaded_by",
+				Columns:    []*schema.Column{DiseaseIdentifiedsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// ImagesColumns holds the columns for the "images" table.
 	ImagesColumns = []*schema.Column{
@@ -126,31 +135,6 @@ var (
 			},
 		},
 	}
-	// UserDiseaseIdentifiedColumns holds the columns for the "user_disease_identified" table.
-	UserDiseaseIdentifiedColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "disease_identified_id", Type: field.TypeUUID},
-	}
-	// UserDiseaseIdentifiedTable holds the schema information for the "user_disease_identified" table.
-	UserDiseaseIdentifiedTable = &schema.Table{
-		Name:       "user_disease_identified",
-		Columns:    UserDiseaseIdentifiedColumns,
-		PrimaryKey: []*schema.Column{UserDiseaseIdentifiedColumns[0], UserDiseaseIdentifiedColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_disease_identified_user_id",
-				Columns:    []*schema.Column{UserDiseaseIdentifiedColumns[0]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "user_disease_identified_disease_identified_id",
-				Columns:    []*schema.Column{UserDiseaseIdentifiedColumns[1]},
-				RefColumns: []*schema.Column{DiseaseIdentifiedsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		DiseasesTable,
@@ -160,15 +144,13 @@ var (
 		UsersTable,
 		DiseaseSolutionsTable,
 		DiseaseIdentifiedDiseaseTable,
-		UserDiseaseIdentifiedTable,
 	}
 )
 
 func init() {
+	DiseaseIdentifiedsTable.ForeignKeys[0].RefTable = UsersTable
 	DiseaseSolutionsTable.ForeignKeys[0].RefTable = DiseasesTable
 	DiseaseSolutionsTable.ForeignKeys[1].RefTable = SolutionsTable
 	DiseaseIdentifiedDiseaseTable.ForeignKeys[0].RefTable = DiseaseIdentifiedsTable
 	DiseaseIdentifiedDiseaseTable.ForeignKeys[1].RefTable = DiseasesTable
-	UserDiseaseIdentifiedTable.ForeignKeys[0].RefTable = UsersTable
-	UserDiseaseIdentifiedTable.ForeignKeys[1].RefTable = DiseaseIdentifiedsTable
 }

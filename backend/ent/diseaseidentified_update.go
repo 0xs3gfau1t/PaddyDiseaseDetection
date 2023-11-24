@@ -45,6 +45,14 @@ func (diu *DiseaseIdentifiedUpdate) SetSeverity(i int) *DiseaseIdentifiedUpdate 
 	return diu
 }
 
+// SetNillableSeverity sets the "severity" field if the given value is not nil.
+func (diu *DiseaseIdentifiedUpdate) SetNillableSeverity(i *int) *DiseaseIdentifiedUpdate {
+	if i != nil {
+		diu.SetSeverity(*i)
+	}
+	return diu
+}
+
 // AddSeverity adds i to the "severity" field.
 func (diu *DiseaseIdentifiedUpdate) AddSeverity(i int) *DiseaseIdentifiedUpdate {
 	diu.mutation.AddSeverity(i)
@@ -83,19 +91,23 @@ func (diu *DiseaseIdentifiedUpdate) SetStatus(d diseaseidentified.Status) *Disea
 	return diu
 }
 
-// AddUplodedByIDs adds the "uploded_by" edge to the User entity by IDs.
-func (diu *DiseaseIdentifiedUpdate) AddUplodedByIDs(ids ...uuid.UUID) *DiseaseIdentifiedUpdate {
-	diu.mutation.AddUplodedByIDs(ids...)
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (diu *DiseaseIdentifiedUpdate) SetNillableStatus(d *diseaseidentified.Status) *DiseaseIdentifiedUpdate {
+	if d != nil {
+		diu.SetStatus(*d)
+	}
 	return diu
 }
 
-// AddUplodedBy adds the "uploded_by" edges to the User entity.
-func (diu *DiseaseIdentifiedUpdate) AddUplodedBy(u ...*User) *DiseaseIdentifiedUpdate {
-	ids := make([]uuid.UUID, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return diu.AddUplodedByIDs(ids...)
+// SetUploadedByID sets the "uploaded_by" edge to the User entity by ID.
+func (diu *DiseaseIdentifiedUpdate) SetUploadedByID(id uuid.UUID) *DiseaseIdentifiedUpdate {
+	diu.mutation.SetUploadedByID(id)
+	return diu
+}
+
+// SetUploadedBy sets the "uploaded_by" edge to the User entity.
+func (diu *DiseaseIdentifiedUpdate) SetUploadedBy(u *User) *DiseaseIdentifiedUpdate {
+	return diu.SetUploadedByID(u.ID)
 }
 
 // AddDiseaseIDs adds the "disease" edge to the Disease entity by IDs.
@@ -118,25 +130,10 @@ func (diu *DiseaseIdentifiedUpdate) Mutation() *DiseaseIdentifiedMutation {
 	return diu.mutation
 }
 
-// ClearUplodedBy clears all "uploded_by" edges to the User entity.
-func (diu *DiseaseIdentifiedUpdate) ClearUplodedBy() *DiseaseIdentifiedUpdate {
-	diu.mutation.ClearUplodedBy()
+// ClearUploadedBy clears the "uploaded_by" edge to the User entity.
+func (diu *DiseaseIdentifiedUpdate) ClearUploadedBy() *DiseaseIdentifiedUpdate {
+	diu.mutation.ClearUploadedBy()
 	return diu
-}
-
-// RemoveUplodedByIDs removes the "uploded_by" edge to User entities by IDs.
-func (diu *DiseaseIdentifiedUpdate) RemoveUplodedByIDs(ids ...uuid.UUID) *DiseaseIdentifiedUpdate {
-	diu.mutation.RemoveUplodedByIDs(ids...)
-	return diu
-}
-
-// RemoveUplodedBy removes "uploded_by" edges to User entities.
-func (diu *DiseaseIdentifiedUpdate) RemoveUplodedBy(u ...*User) *DiseaseIdentifiedUpdate {
-	ids := make([]uuid.UUID, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return diu.RemoveUplodedByIDs(ids...)
 }
 
 // ClearDisease clears all "disease" edges to the Disease entity.
@@ -199,6 +196,9 @@ func (diu *DiseaseIdentifiedUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "DiseaseIdentified.status": %w`, err)}
 		}
 	}
+	if _, ok := diu.mutation.UploadedByID(); diu.mutation.UploadedByCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "DiseaseIdentified.uploaded_by"`)
+	}
 	return nil
 }
 
@@ -237,12 +237,12 @@ func (diu *DiseaseIdentifiedUpdate) sqlSave(ctx context.Context) (n int, err err
 	if value, ok := diu.mutation.Status(); ok {
 		_spec.SetField(diseaseidentified.FieldStatus, field.TypeEnum, value)
 	}
-	if diu.mutation.UplodedByCleared() {
+	if diu.mutation.UploadedByCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   diseaseidentified.UploadedByTable,
+			Columns: []string{diseaseidentified.UploadedByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -250,28 +250,12 @@ func (diu *DiseaseIdentifiedUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := diu.mutation.RemovedUplodedByIDs(); len(nodes) > 0 && !diu.mutation.UplodedByCleared() {
+	if nodes := diu.mutation.UploadedByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := diu.mutation.UplodedByIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   diseaseidentified.UploadedByTable,
+			Columns: []string{diseaseidentified.UploadedByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -360,6 +344,14 @@ func (diuo *DiseaseIdentifiedUpdateOne) SetSeverity(i int) *DiseaseIdentifiedUpd
 	return diuo
 }
 
+// SetNillableSeverity sets the "severity" field if the given value is not nil.
+func (diuo *DiseaseIdentifiedUpdateOne) SetNillableSeverity(i *int) *DiseaseIdentifiedUpdateOne {
+	if i != nil {
+		diuo.SetSeverity(*i)
+	}
+	return diuo
+}
+
 // AddSeverity adds i to the "severity" field.
 func (diuo *DiseaseIdentifiedUpdateOne) AddSeverity(i int) *DiseaseIdentifiedUpdateOne {
 	diuo.mutation.AddSeverity(i)
@@ -398,19 +390,23 @@ func (diuo *DiseaseIdentifiedUpdateOne) SetStatus(d diseaseidentified.Status) *D
 	return diuo
 }
 
-// AddUplodedByIDs adds the "uploded_by" edge to the User entity by IDs.
-func (diuo *DiseaseIdentifiedUpdateOne) AddUplodedByIDs(ids ...uuid.UUID) *DiseaseIdentifiedUpdateOne {
-	diuo.mutation.AddUplodedByIDs(ids...)
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (diuo *DiseaseIdentifiedUpdateOne) SetNillableStatus(d *diseaseidentified.Status) *DiseaseIdentifiedUpdateOne {
+	if d != nil {
+		diuo.SetStatus(*d)
+	}
 	return diuo
 }
 
-// AddUplodedBy adds the "uploded_by" edges to the User entity.
-func (diuo *DiseaseIdentifiedUpdateOne) AddUplodedBy(u ...*User) *DiseaseIdentifiedUpdateOne {
-	ids := make([]uuid.UUID, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return diuo.AddUplodedByIDs(ids...)
+// SetUploadedByID sets the "uploaded_by" edge to the User entity by ID.
+func (diuo *DiseaseIdentifiedUpdateOne) SetUploadedByID(id uuid.UUID) *DiseaseIdentifiedUpdateOne {
+	diuo.mutation.SetUploadedByID(id)
+	return diuo
+}
+
+// SetUploadedBy sets the "uploaded_by" edge to the User entity.
+func (diuo *DiseaseIdentifiedUpdateOne) SetUploadedBy(u *User) *DiseaseIdentifiedUpdateOne {
+	return diuo.SetUploadedByID(u.ID)
 }
 
 // AddDiseaseIDs adds the "disease" edge to the Disease entity by IDs.
@@ -433,25 +429,10 @@ func (diuo *DiseaseIdentifiedUpdateOne) Mutation() *DiseaseIdentifiedMutation {
 	return diuo.mutation
 }
 
-// ClearUplodedBy clears all "uploded_by" edges to the User entity.
-func (diuo *DiseaseIdentifiedUpdateOne) ClearUplodedBy() *DiseaseIdentifiedUpdateOne {
-	diuo.mutation.ClearUplodedBy()
+// ClearUploadedBy clears the "uploaded_by" edge to the User entity.
+func (diuo *DiseaseIdentifiedUpdateOne) ClearUploadedBy() *DiseaseIdentifiedUpdateOne {
+	diuo.mutation.ClearUploadedBy()
 	return diuo
-}
-
-// RemoveUplodedByIDs removes the "uploded_by" edge to User entities by IDs.
-func (diuo *DiseaseIdentifiedUpdateOne) RemoveUplodedByIDs(ids ...uuid.UUID) *DiseaseIdentifiedUpdateOne {
-	diuo.mutation.RemoveUplodedByIDs(ids...)
-	return diuo
-}
-
-// RemoveUplodedBy removes "uploded_by" edges to User entities.
-func (diuo *DiseaseIdentifiedUpdateOne) RemoveUplodedBy(u ...*User) *DiseaseIdentifiedUpdateOne {
-	ids := make([]uuid.UUID, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return diuo.RemoveUplodedByIDs(ids...)
 }
 
 // ClearDisease clears all "disease" edges to the Disease entity.
@@ -527,6 +508,9 @@ func (diuo *DiseaseIdentifiedUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "DiseaseIdentified.status": %w`, err)}
 		}
 	}
+	if _, ok := diuo.mutation.UploadedByID(); diuo.mutation.UploadedByCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "DiseaseIdentified.uploaded_by"`)
+	}
 	return nil
 }
 
@@ -582,12 +566,12 @@ func (diuo *DiseaseIdentifiedUpdateOne) sqlSave(ctx context.Context) (_node *Dis
 	if value, ok := diuo.mutation.Status(); ok {
 		_spec.SetField(diseaseidentified.FieldStatus, field.TypeEnum, value)
 	}
-	if diuo.mutation.UplodedByCleared() {
+	if diuo.mutation.UploadedByCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   diseaseidentified.UploadedByTable,
+			Columns: []string{diseaseidentified.UploadedByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -595,28 +579,12 @@ func (diuo *DiseaseIdentifiedUpdateOne) sqlSave(ctx context.Context) (_node *Dis
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := diuo.mutation.RemovedUplodedByIDs(); len(nodes) > 0 && !diuo.mutation.UplodedByCleared() {
+	if nodes := diuo.mutation.UploadedByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := diuo.mutation.UplodedByIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   diseaseidentified.UploadedByTable,
+			Columns: []string{diseaseidentified.UploadedByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),

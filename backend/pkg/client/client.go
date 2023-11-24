@@ -23,7 +23,6 @@ func init() {
 func New() *Client {
 	dbClient, err := config.NewDbClient()
 	storageAdapter := storage.NewSupaBaseStorage(os.Getenv("SUPABASE_CONN_STRING"), os.Getenv("SUPABASE_KEY"), os.Getenv("IMAGE_BUCKET"))
-	log.Println(storageAdapter.Client)
 	if err != nil {
 		log.Fatal("Couldn't initialize a database client")
 	}

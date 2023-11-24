@@ -507,15 +507,15 @@ func (c *DiseaseIdentifiedClient) GetX(ctx context.Context, id uuid.UUID) *Disea
 	return obj
 }
 
-// QueryUplodedBy queries the uploded_by edge of a DiseaseIdentified.
-func (c *DiseaseIdentifiedClient) QueryUplodedBy(di *DiseaseIdentified) *UserQuery {
+// QueryUploadedBy queries the uploaded_by edge of a DiseaseIdentified.
+func (c *DiseaseIdentifiedClient) QueryUploadedBy(di *DiseaseIdentified) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := di.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(diseaseidentified.Table, diseaseidentified.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, diseaseidentified.UplodedByTable, diseaseidentified.UplodedByPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, diseaseidentified.UploadedByTable, diseaseidentified.UploadedByColumn),
 		)
 		fromV = sqlgraph.Neighbors(di.driver.Dialect(), step)
 		return fromV, nil
@@ -954,15 +954,15 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
-// QueryDiseaseIdentified queries the disease_identified edge of a User.
-func (c *UserClient) QueryDiseaseIdentified(u *User) *DiseaseIdentifiedQuery {
+// QueryDiseasesIdentified queries the diseases_identified edge of a User.
+func (c *UserClient) QueryDiseasesIdentified(u *User) *DiseaseIdentifiedQuery {
 	query := (&DiseaseIdentifiedClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(diseaseidentified.Table, diseaseidentified.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.DiseaseIdentifiedTable, user.DiseaseIdentifiedPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.DiseasesIdentifiedTable, user.DiseasesIdentifiedColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

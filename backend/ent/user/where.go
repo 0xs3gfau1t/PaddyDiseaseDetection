@@ -415,21 +415,21 @@ func PasswordContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldPassword, v))
 }
 
-// HasDiseaseIdentified applies the HasEdge predicate on the "disease_identified" edge.
-func HasDiseaseIdentified() predicate.User {
+// HasDiseasesIdentified applies the HasEdge predicate on the "diseases_identified" edge.
+func HasDiseasesIdentified() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, DiseaseIdentifiedTable, DiseaseIdentifiedPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, DiseasesIdentifiedTable, DiseasesIdentifiedColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDiseaseIdentifiedWith applies the HasEdge predicate on the "disease_identified" edge with a given conditions (other predicates).
-func HasDiseaseIdentifiedWith(preds ...predicate.DiseaseIdentified) predicate.User {
+// HasDiseasesIdentifiedWith applies the HasEdge predicate on the "diseases_identified" edge with a given conditions (other predicates).
+func HasDiseasesIdentifiedWith(preds ...predicate.DiseaseIdentified) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newDiseaseIdentifiedStep()
+		step := newDiseasesIdentifiedStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

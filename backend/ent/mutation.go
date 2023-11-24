@@ -617,26 +617,25 @@ func (m *DiseaseMutation) ResetEdge(name string) error {
 // DiseaseIdentifiedMutation represents an operation that mutates the DiseaseIdentified nodes in the graph.
 type DiseaseIdentifiedMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *uuid.UUID
-	location          *string
-	severity          *int
-	addseverity       *int
-	created_at        *time.Time
-	photos            *[]string
-	appendphotos      []string
-	status            *diseaseidentified.Status
-	clearedFields     map[string]struct{}
-	uploded_by        map[uuid.UUID]struct{}
-	removeduploded_by map[uuid.UUID]struct{}
-	cleareduploded_by bool
-	disease           map[uuid.UUID]struct{}
-	removeddisease    map[uuid.UUID]struct{}
-	cleareddisease    bool
-	done              bool
-	oldValue          func(context.Context) (*DiseaseIdentified, error)
-	predicates        []predicate.DiseaseIdentified
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	location           *string
+	severity           *int
+	addseverity        *int
+	created_at         *time.Time
+	photos             *[]string
+	appendphotos       []string
+	status             *diseaseidentified.Status
+	clearedFields      map[string]struct{}
+	uploaded_by        *uuid.UUID
+	cleareduploaded_by bool
+	disease            map[uuid.UUID]struct{}
+	removeddisease     map[uuid.UUID]struct{}
+	cleareddisease     bool
+	done               bool
+	oldValue           func(context.Context) (*DiseaseIdentified, error)
+	predicates         []predicate.DiseaseIdentified
 }
 
 var _ ent.Mutation = (*DiseaseIdentifiedMutation)(nil)
@@ -958,58 +957,43 @@ func (m *DiseaseIdentifiedMutation) ResetStatus() {
 	m.status = nil
 }
 
-// AddUplodedByIDs adds the "uploded_by" edge to the User entity by ids.
-func (m *DiseaseIdentifiedMutation) AddUplodedByIDs(ids ...uuid.UUID) {
-	if m.uploded_by == nil {
-		m.uploded_by = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.uploded_by[ids[i]] = struct{}{}
-	}
+// SetUploadedByID sets the "uploaded_by" edge to the User entity by id.
+func (m *DiseaseIdentifiedMutation) SetUploadedByID(id uuid.UUID) {
+	m.uploaded_by = &id
 }
 
-// ClearUplodedBy clears the "uploded_by" edge to the User entity.
-func (m *DiseaseIdentifiedMutation) ClearUplodedBy() {
-	m.cleareduploded_by = true
+// ClearUploadedBy clears the "uploaded_by" edge to the User entity.
+func (m *DiseaseIdentifiedMutation) ClearUploadedBy() {
+	m.cleareduploaded_by = true
 }
 
-// UplodedByCleared reports if the "uploded_by" edge to the User entity was cleared.
-func (m *DiseaseIdentifiedMutation) UplodedByCleared() bool {
-	return m.cleareduploded_by
+// UploadedByCleared reports if the "uploaded_by" edge to the User entity was cleared.
+func (m *DiseaseIdentifiedMutation) UploadedByCleared() bool {
+	return m.cleareduploaded_by
 }
 
-// RemoveUplodedByIDs removes the "uploded_by" edge to the User entity by IDs.
-func (m *DiseaseIdentifiedMutation) RemoveUplodedByIDs(ids ...uuid.UUID) {
-	if m.removeduploded_by == nil {
-		m.removeduploded_by = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.uploded_by, ids[i])
-		m.removeduploded_by[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedUplodedBy returns the removed IDs of the "uploded_by" edge to the User entity.
-func (m *DiseaseIdentifiedMutation) RemovedUplodedByIDs() (ids []uuid.UUID) {
-	for id := range m.removeduploded_by {
-		ids = append(ids, id)
+// UploadedByID returns the "uploaded_by" edge ID in the mutation.
+func (m *DiseaseIdentifiedMutation) UploadedByID() (id uuid.UUID, exists bool) {
+	if m.uploaded_by != nil {
+		return *m.uploaded_by, true
 	}
 	return
 }
 
-// UplodedByIDs returns the "uploded_by" edge IDs in the mutation.
-func (m *DiseaseIdentifiedMutation) UplodedByIDs() (ids []uuid.UUID) {
-	for id := range m.uploded_by {
-		ids = append(ids, id)
+// UploadedByIDs returns the "uploaded_by" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UploadedByID instead. It exists only for internal usage by the builders.
+func (m *DiseaseIdentifiedMutation) UploadedByIDs() (ids []uuid.UUID) {
+	if id := m.uploaded_by; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetUplodedBy resets all changes to the "uploded_by" edge.
-func (m *DiseaseIdentifiedMutation) ResetUplodedBy() {
-	m.uploded_by = nil
-	m.cleareduploded_by = false
-	m.removeduploded_by = nil
+// ResetUploadedBy resets all changes to the "uploaded_by" edge.
+func (m *DiseaseIdentifiedMutation) ResetUploadedBy() {
+	m.uploaded_by = nil
+	m.cleareduploaded_by = false
 }
 
 // AddDiseaseIDs adds the "disease" edge to the Disease entity by ids.
@@ -1283,8 +1267,8 @@ func (m *DiseaseIdentifiedMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DiseaseIdentifiedMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.uploded_by != nil {
-		edges = append(edges, diseaseidentified.EdgeUplodedBy)
+	if m.uploaded_by != nil {
+		edges = append(edges, diseaseidentified.EdgeUploadedBy)
 	}
 	if m.disease != nil {
 		edges = append(edges, diseaseidentified.EdgeDisease)
@@ -1296,12 +1280,10 @@ func (m *DiseaseIdentifiedMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *DiseaseIdentifiedMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case diseaseidentified.EdgeUplodedBy:
-		ids := make([]ent.Value, 0, len(m.uploded_by))
-		for id := range m.uploded_by {
-			ids = append(ids, id)
+	case diseaseidentified.EdgeUploadedBy:
+		if id := m.uploaded_by; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case diseaseidentified.EdgeDisease:
 		ids := make([]ent.Value, 0, len(m.disease))
 		for id := range m.disease {
@@ -1315,9 +1297,6 @@ func (m *DiseaseIdentifiedMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DiseaseIdentifiedMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removeduploded_by != nil {
-		edges = append(edges, diseaseidentified.EdgeUplodedBy)
-	}
 	if m.removeddisease != nil {
 		edges = append(edges, diseaseidentified.EdgeDisease)
 	}
@@ -1328,12 +1307,6 @@ func (m *DiseaseIdentifiedMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *DiseaseIdentifiedMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case diseaseidentified.EdgeUplodedBy:
-		ids := make([]ent.Value, 0, len(m.removeduploded_by))
-		for id := range m.removeduploded_by {
-			ids = append(ids, id)
-		}
-		return ids
 	case diseaseidentified.EdgeDisease:
 		ids := make([]ent.Value, 0, len(m.removeddisease))
 		for id := range m.removeddisease {
@@ -1347,8 +1320,8 @@ func (m *DiseaseIdentifiedMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DiseaseIdentifiedMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.cleareduploded_by {
-		edges = append(edges, diseaseidentified.EdgeUplodedBy)
+	if m.cleareduploaded_by {
+		edges = append(edges, diseaseidentified.EdgeUploadedBy)
 	}
 	if m.cleareddisease {
 		edges = append(edges, diseaseidentified.EdgeDisease)
@@ -1360,8 +1333,8 @@ func (m *DiseaseIdentifiedMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *DiseaseIdentifiedMutation) EdgeCleared(name string) bool {
 	switch name {
-	case diseaseidentified.EdgeUplodedBy:
-		return m.cleareduploded_by
+	case diseaseidentified.EdgeUploadedBy:
+		return m.cleareduploaded_by
 	case diseaseidentified.EdgeDisease:
 		return m.cleareddisease
 	}
@@ -1372,6 +1345,9 @@ func (m *DiseaseIdentifiedMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *DiseaseIdentifiedMutation) ClearEdge(name string) error {
 	switch name {
+	case diseaseidentified.EdgeUploadedBy:
+		m.ClearUploadedBy()
+		return nil
 	}
 	return fmt.Errorf("unknown DiseaseIdentified unique edge %s", name)
 }
@@ -1380,8 +1356,8 @@ func (m *DiseaseIdentifiedMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DiseaseIdentifiedMutation) ResetEdge(name string) error {
 	switch name {
-	case diseaseidentified.EdgeUplodedBy:
-		m.ResetUplodedBy()
+	case diseaseidentified.EdgeUploadedBy:
+		m.ResetUploadedBy()
 		return nil
 	case diseaseidentified.EdgeDisease:
 		m.ResetDisease()
@@ -2398,21 +2374,21 @@ func (m *SolutionMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *uuid.UUID
-	name                      *string
-	email                     *string
-	location                  *string
-	coord                     *string
-	password                  *string
-	clearedFields             map[string]struct{}
-	disease_identified        map[uuid.UUID]struct{}
-	removeddisease_identified map[uuid.UUID]struct{}
-	cleareddisease_identified bool
-	done                      bool
-	oldValue                  func(context.Context) (*User, error)
-	predicates                []predicate.User
+	op                         Op
+	typ                        string
+	id                         *uuid.UUID
+	name                       *string
+	email                      *string
+	location                   *string
+	coord                      *string
+	password                   *string
+	clearedFields              map[string]struct{}
+	diseases_identified        map[uuid.UUID]struct{}
+	removeddiseases_identified map[uuid.UUID]struct{}
+	cleareddiseases_identified bool
+	done                       bool
+	oldValue                   func(context.Context) (*User, error)
+	predicates                 []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -2712,58 +2688,58 @@ func (m *UserMutation) ResetPassword() {
 	m.password = nil
 }
 
-// AddDiseaseIdentifiedIDs adds the "disease_identified" edge to the DiseaseIdentified entity by ids.
-func (m *UserMutation) AddDiseaseIdentifiedIDs(ids ...uuid.UUID) {
-	if m.disease_identified == nil {
-		m.disease_identified = make(map[uuid.UUID]struct{})
+// AddDiseasesIdentifiedIDs adds the "diseases_identified" edge to the DiseaseIdentified entity by ids.
+func (m *UserMutation) AddDiseasesIdentifiedIDs(ids ...uuid.UUID) {
+	if m.diseases_identified == nil {
+		m.diseases_identified = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.disease_identified[ids[i]] = struct{}{}
+		m.diseases_identified[ids[i]] = struct{}{}
 	}
 }
 
-// ClearDiseaseIdentified clears the "disease_identified" edge to the DiseaseIdentified entity.
-func (m *UserMutation) ClearDiseaseIdentified() {
-	m.cleareddisease_identified = true
+// ClearDiseasesIdentified clears the "diseases_identified" edge to the DiseaseIdentified entity.
+func (m *UserMutation) ClearDiseasesIdentified() {
+	m.cleareddiseases_identified = true
 }
 
-// DiseaseIdentifiedCleared reports if the "disease_identified" edge to the DiseaseIdentified entity was cleared.
-func (m *UserMutation) DiseaseIdentifiedCleared() bool {
-	return m.cleareddisease_identified
+// DiseasesIdentifiedCleared reports if the "diseases_identified" edge to the DiseaseIdentified entity was cleared.
+func (m *UserMutation) DiseasesIdentifiedCleared() bool {
+	return m.cleareddiseases_identified
 }
 
-// RemoveDiseaseIdentifiedIDs removes the "disease_identified" edge to the DiseaseIdentified entity by IDs.
-func (m *UserMutation) RemoveDiseaseIdentifiedIDs(ids ...uuid.UUID) {
-	if m.removeddisease_identified == nil {
-		m.removeddisease_identified = make(map[uuid.UUID]struct{})
+// RemoveDiseasesIdentifiedIDs removes the "diseases_identified" edge to the DiseaseIdentified entity by IDs.
+func (m *UserMutation) RemoveDiseasesIdentifiedIDs(ids ...uuid.UUID) {
+	if m.removeddiseases_identified == nil {
+		m.removeddiseases_identified = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.disease_identified, ids[i])
-		m.removeddisease_identified[ids[i]] = struct{}{}
+		delete(m.diseases_identified, ids[i])
+		m.removeddiseases_identified[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedDiseaseIdentified returns the removed IDs of the "disease_identified" edge to the DiseaseIdentified entity.
-func (m *UserMutation) RemovedDiseaseIdentifiedIDs() (ids []uuid.UUID) {
-	for id := range m.removeddisease_identified {
+// RemovedDiseasesIdentified returns the removed IDs of the "diseases_identified" edge to the DiseaseIdentified entity.
+func (m *UserMutation) RemovedDiseasesIdentifiedIDs() (ids []uuid.UUID) {
+	for id := range m.removeddiseases_identified {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// DiseaseIdentifiedIDs returns the "disease_identified" edge IDs in the mutation.
-func (m *UserMutation) DiseaseIdentifiedIDs() (ids []uuid.UUID) {
-	for id := range m.disease_identified {
+// DiseasesIdentifiedIDs returns the "diseases_identified" edge IDs in the mutation.
+func (m *UserMutation) DiseasesIdentifiedIDs() (ids []uuid.UUID) {
+	for id := range m.diseases_identified {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetDiseaseIdentified resets all changes to the "disease_identified" edge.
-func (m *UserMutation) ResetDiseaseIdentified() {
-	m.disease_identified = nil
-	m.cleareddisease_identified = false
-	m.removeddisease_identified = nil
+// ResetDiseasesIdentified resets all changes to the "diseases_identified" edge.
+func (m *UserMutation) ResetDiseasesIdentified() {
+	m.diseases_identified = nil
+	m.cleareddiseases_identified = false
+	m.removeddiseases_identified = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -2977,8 +2953,8 @@ func (m *UserMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.disease_identified != nil {
-		edges = append(edges, user.EdgeDiseaseIdentified)
+	if m.diseases_identified != nil {
+		edges = append(edges, user.EdgeDiseasesIdentified)
 	}
 	return edges
 }
@@ -2987,9 +2963,9 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeDiseaseIdentified:
-		ids := make([]ent.Value, 0, len(m.disease_identified))
-		for id := range m.disease_identified {
+	case user.EdgeDiseasesIdentified:
+		ids := make([]ent.Value, 0, len(m.diseases_identified))
+		for id := range m.diseases_identified {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3000,8 +2976,8 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removeddisease_identified != nil {
-		edges = append(edges, user.EdgeDiseaseIdentified)
+	if m.removeddiseases_identified != nil {
+		edges = append(edges, user.EdgeDiseasesIdentified)
 	}
 	return edges
 }
@@ -3010,9 +2986,9 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeDiseaseIdentified:
-		ids := make([]ent.Value, 0, len(m.removeddisease_identified))
-		for id := range m.removeddisease_identified {
+	case user.EdgeDiseasesIdentified:
+		ids := make([]ent.Value, 0, len(m.removeddiseases_identified))
+		for id := range m.removeddiseases_identified {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3023,8 +2999,8 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.cleareddisease_identified {
-		edges = append(edges, user.EdgeDiseaseIdentified)
+	if m.cleareddiseases_identified {
+		edges = append(edges, user.EdgeDiseasesIdentified)
 	}
 	return edges
 }
@@ -3033,8 +3009,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeDiseaseIdentified:
-		return m.cleareddisease_identified
+	case user.EdgeDiseasesIdentified:
+		return m.cleareddiseases_identified
 	}
 	return false
 }
@@ -3051,8 +3027,8 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeDiseaseIdentified:
-		m.ResetDiseaseIdentified()
+	case user.EdgeDiseasesIdentified:
+		m.ResetDiseasesIdentified()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

@@ -24,6 +24,6 @@ func (User) Fields() []ent.Field {
 
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("disease_identified", DiseaseIdentified.Type),
+		edge.From("diseases_identified", DiseaseIdentified.Type).Ref("uploaded_by"),
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"segFault/PaddyDiseaseDetection/ent/diseaseidentified"
+	"segFault/PaddyDiseaseDetection/ent/user"
 	"strings"
 	"time"
 
@@ -31,14 +32,15 @@ type DiseaseIdentified struct {
 	Status diseaseidentified.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DiseaseIdentifiedQuery when eager-loading is set.
-	Edges        DiseaseIdentifiedEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                          DiseaseIdentifiedEdges `json:"edges"`
+	disease_identified_uploaded_by *uuid.UUID
+	selectValues                   sql.SelectValues
 }
 
 // DiseaseIdentifiedEdges holds the relations/edges for other nodes in the graph.
 type DiseaseIdentifiedEdges struct {
-	// UplodedBy holds the value of the uploded_by edge.
-	UplodedBy []*User `json:"uploded_by,omitempty"`
+	// UploadedBy holds the value of the uploaded_by edge.
+	UploadedBy *User `json:"uploaded_by,omitempty"`
 	// Disease holds the value of the disease edge.
 	Disease []*Disease `json:"disease,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -46,13 +48,17 @@ type DiseaseIdentifiedEdges struct {
 	loadedTypes [2]bool
 }
 
-// UplodedByOrErr returns the UplodedBy value or an error if the edge
-// was not loaded in eager-loading.
-func (e DiseaseIdentifiedEdges) UplodedByOrErr() ([]*User, error) {
+// UploadedByOrErr returns the UploadedBy value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DiseaseIdentifiedEdges) UploadedByOrErr() (*User, error) {
 	if e.loadedTypes[0] {
-		return e.UplodedBy, nil
+		if e.UploadedBy == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.UploadedBy, nil
 	}
-	return nil, &NotLoadedError{edge: "uploded_by"}
+	return nil, &NotLoadedError{edge: "uploaded_by"}
 }
 
 // DiseaseOrErr returns the Disease value or an error if the edge
@@ -79,6 +85,8 @@ func (*DiseaseIdentified) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case diseaseidentified.FieldID:
 			values[i] = new(uuid.UUID)
+		case diseaseidentified.ForeignKeys[0]: // disease_identified_uploaded_by
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -132,6 +140,13 @@ func (di *DiseaseIdentified) assignValues(columns []string, values []any) error 
 			} else if value.Valid {
 				di.Status = diseaseidentified.Status(value.String)
 			}
+		case diseaseidentified.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field disease_identified_uploaded_by", values[i])
+			} else if value.Valid {
+				di.disease_identified_uploaded_by = new(uuid.UUID)
+				*di.disease_identified_uploaded_by = *value.S.(*uuid.UUID)
+			}
 		default:
 			di.selectValues.Set(columns[i], values[i])
 		}
@@ -145,9 +160,9 @@ func (di *DiseaseIdentified) Value(name string) (ent.Value, error) {
 	return di.selectValues.Get(name)
 }
 
-// QueryUplodedBy queries the "uploded_by" edge of the DiseaseIdentified entity.
-func (di *DiseaseIdentified) QueryUplodedBy() *UserQuery {
-	return NewDiseaseIdentifiedClient(di.config).QueryUplodedBy(di)
+// QueryUploadedBy queries the "uploaded_by" edge of the DiseaseIdentified entity.
+func (di *DiseaseIdentified) QueryUploadedBy() *UserQuery {
+	return NewDiseaseIdentifiedClient(di.config).QueryUploadedBy(di)
 }
 
 // QueryDisease queries the "disease" edge of the DiseaseIdentified entity.

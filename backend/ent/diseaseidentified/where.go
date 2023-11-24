@@ -236,21 +236,21 @@ func StatusNotIn(vs ...Status) predicate.DiseaseIdentified {
 	return predicate.DiseaseIdentified(sql.FieldNotIn(FieldStatus, vs...))
 }
 
-// HasUplodedBy applies the HasEdge predicate on the "uploded_by" edge.
-func HasUplodedBy() predicate.DiseaseIdentified {
+// HasUploadedBy applies the HasEdge predicate on the "uploaded_by" edge.
+func HasUploadedBy() predicate.DiseaseIdentified {
 	return predicate.DiseaseIdentified(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, UplodedByTable, UplodedByPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, UploadedByTable, UploadedByColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUplodedByWith applies the HasEdge predicate on the "uploded_by" edge with a given conditions (other predicates).
-func HasUplodedByWith(preds ...predicate.User) predicate.DiseaseIdentified {
+// HasUploadedByWith applies the HasEdge predicate on the "uploaded_by" edge with a given conditions (other predicates).
+func HasUploadedByWith(preds ...predicate.User) predicate.DiseaseIdentified {
 	return predicate.DiseaseIdentified(func(s *sql.Selector) {
-		step := newUplodedByStep()
+		step := newUploadedByStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

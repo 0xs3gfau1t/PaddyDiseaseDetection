@@ -35,6 +35,14 @@ func (dic *DiseaseIdentifiedCreate) SetSeverity(i int) *DiseaseIdentifiedCreate 
 	return dic
 }
 
+// SetNillableSeverity sets the "severity" field if the given value is not nil.
+func (dic *DiseaseIdentifiedCreate) SetNillableSeverity(i *int) *DiseaseIdentifiedCreate {
+	if i != nil {
+		dic.SetSeverity(*i)
+	}
+	return dic
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (dic *DiseaseIdentifiedCreate) SetCreatedAt(t time.Time) *DiseaseIdentifiedCreate {
 	dic.mutation.SetCreatedAt(t)
@@ -61,25 +69,29 @@ func (dic *DiseaseIdentifiedCreate) SetStatus(d diseaseidentified.Status) *Disea
 	return dic
 }
 
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (dic *DiseaseIdentifiedCreate) SetNillableStatus(d *diseaseidentified.Status) *DiseaseIdentifiedCreate {
+	if d != nil {
+		dic.SetStatus(*d)
+	}
+	return dic
+}
+
 // SetID sets the "id" field.
 func (dic *DiseaseIdentifiedCreate) SetID(u uuid.UUID) *DiseaseIdentifiedCreate {
 	dic.mutation.SetID(u)
 	return dic
 }
 
-// AddUplodedByIDs adds the "uploded_by" edge to the User entity by IDs.
-func (dic *DiseaseIdentifiedCreate) AddUplodedByIDs(ids ...uuid.UUID) *DiseaseIdentifiedCreate {
-	dic.mutation.AddUplodedByIDs(ids...)
+// SetUploadedByID sets the "uploaded_by" edge to the User entity by ID.
+func (dic *DiseaseIdentifiedCreate) SetUploadedByID(id uuid.UUID) *DiseaseIdentifiedCreate {
+	dic.mutation.SetUploadedByID(id)
 	return dic
 }
 
-// AddUplodedBy adds the "uploded_by" edges to the User entity.
-func (dic *DiseaseIdentifiedCreate) AddUplodedBy(u ...*User) *DiseaseIdentifiedCreate {
-	ids := make([]uuid.UUID, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return dic.AddUplodedByIDs(ids...)
+// SetUploadedBy sets the "uploaded_by" edge to the User entity.
+func (dic *DiseaseIdentifiedCreate) SetUploadedBy(u *User) *DiseaseIdentifiedCreate {
+	return dic.SetUploadedByID(u.ID)
 }
 
 // AddDiseaseIDs adds the "disease" edge to the Disease entity by IDs.
@@ -132,9 +144,17 @@ func (dic *DiseaseIdentifiedCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (dic *DiseaseIdentifiedCreate) defaults() {
+	if _, ok := dic.mutation.Severity(); !ok {
+		v := diseaseidentified.DefaultSeverity
+		dic.mutation.SetSeverity(v)
+	}
 	if _, ok := dic.mutation.CreatedAt(); !ok {
 		v := diseaseidentified.DefaultCreatedAt()
 		dic.mutation.SetCreatedAt(v)
+	}
+	if _, ok := dic.mutation.Status(); !ok {
+		v := diseaseidentified.DefaultStatus
+		dic.mutation.SetStatus(v)
 	}
 }
 
@@ -164,6 +184,9 @@ func (dic *DiseaseIdentifiedCreate) check() error {
 		if err := diseaseidentified.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "DiseaseIdentified.status": %w`, err)}
 		}
+	}
+	if _, ok := dic.mutation.UploadedByID(); !ok {
+		return &ValidationError{Name: "uploaded_by", err: errors.New(`ent: missing required edge "DiseaseIdentified.uploaded_by"`)}
 	}
 	return nil
 }
@@ -220,12 +243,12 @@ func (dic *DiseaseIdentifiedCreate) createSpec() (*DiseaseIdentified, *sqlgraph.
 		_spec.SetField(diseaseidentified.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if nodes := dic.mutation.UplodedByIDs(); len(nodes) > 0 {
+	if nodes := dic.mutation.UploadedByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   diseaseidentified.UplodedByTable,
-			Columns: diseaseidentified.UplodedByPrimaryKey,
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   diseaseidentified.UploadedByTable,
+			Columns: []string{diseaseidentified.UploadedByColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
@@ -234,6 +257,7 @@ func (dic *DiseaseIdentifiedCreate) createSpec() (*DiseaseIdentified, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.disease_identified_uploaded_by = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := dic.mutation.DiseaseIDs(); len(nodes) > 0 {

@@ -73,19 +73,19 @@ func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
 	return uu
 }
 
-// AddDiseaseIdentifiedIDs adds the "disease_identified" edge to the DiseaseIdentified entity by IDs.
-func (uu *UserUpdate) AddDiseaseIdentifiedIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddDiseaseIdentifiedIDs(ids...)
+// AddDiseasesIdentifiedIDs adds the "diseases_identified" edge to the DiseaseIdentified entity by IDs.
+func (uu *UserUpdate) AddDiseasesIdentifiedIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddDiseasesIdentifiedIDs(ids...)
 	return uu
 }
 
-// AddDiseaseIdentified adds the "disease_identified" edges to the DiseaseIdentified entity.
-func (uu *UserUpdate) AddDiseaseIdentified(d ...*DiseaseIdentified) *UserUpdate {
+// AddDiseasesIdentified adds the "diseases_identified" edges to the DiseaseIdentified entity.
+func (uu *UserUpdate) AddDiseasesIdentified(d ...*DiseaseIdentified) *UserUpdate {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return uu.AddDiseaseIdentifiedIDs(ids...)
+	return uu.AddDiseasesIdentifiedIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -93,25 +93,25 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearDiseaseIdentified clears all "disease_identified" edges to the DiseaseIdentified entity.
-func (uu *UserUpdate) ClearDiseaseIdentified() *UserUpdate {
-	uu.mutation.ClearDiseaseIdentified()
+// ClearDiseasesIdentified clears all "diseases_identified" edges to the DiseaseIdentified entity.
+func (uu *UserUpdate) ClearDiseasesIdentified() *UserUpdate {
+	uu.mutation.ClearDiseasesIdentified()
 	return uu
 }
 
-// RemoveDiseaseIdentifiedIDs removes the "disease_identified" edge to DiseaseIdentified entities by IDs.
-func (uu *UserUpdate) RemoveDiseaseIdentifiedIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveDiseaseIdentifiedIDs(ids...)
+// RemoveDiseasesIdentifiedIDs removes the "diseases_identified" edge to DiseaseIdentified entities by IDs.
+func (uu *UserUpdate) RemoveDiseasesIdentifiedIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveDiseasesIdentifiedIDs(ids...)
 	return uu
 }
 
-// RemoveDiseaseIdentified removes "disease_identified" edges to DiseaseIdentified entities.
-func (uu *UserUpdate) RemoveDiseaseIdentified(d ...*DiseaseIdentified) *UserUpdate {
+// RemoveDiseasesIdentified removes "diseases_identified" edges to DiseaseIdentified entities.
+func (uu *UserUpdate) RemoveDiseasesIdentified(d ...*DiseaseIdentified) *UserUpdate {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return uu.RemoveDiseaseIdentifiedIDs(ids...)
+	return uu.RemoveDiseasesIdentifiedIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -168,12 +168,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
-	if uu.mutation.DiseaseIdentifiedCleared() {
+	if uu.mutation.DiseasesIdentifiedCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),
@@ -181,12 +181,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedDiseaseIdentifiedIDs(); len(nodes) > 0 && !uu.mutation.DiseaseIdentifiedCleared() {
+	if nodes := uu.mutation.RemovedDiseasesIdentifiedIDs(); len(nodes) > 0 && !uu.mutation.DiseasesIdentifiedCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),
@@ -197,12 +197,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.DiseaseIdentifiedIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.DiseasesIdentifiedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),
@@ -277,19 +277,19 @@ func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
 	return uuo
 }
 
-// AddDiseaseIdentifiedIDs adds the "disease_identified" edge to the DiseaseIdentified entity by IDs.
-func (uuo *UserUpdateOne) AddDiseaseIdentifiedIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddDiseaseIdentifiedIDs(ids...)
+// AddDiseasesIdentifiedIDs adds the "diseases_identified" edge to the DiseaseIdentified entity by IDs.
+func (uuo *UserUpdateOne) AddDiseasesIdentifiedIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddDiseasesIdentifiedIDs(ids...)
 	return uuo
 }
 
-// AddDiseaseIdentified adds the "disease_identified" edges to the DiseaseIdentified entity.
-func (uuo *UserUpdateOne) AddDiseaseIdentified(d ...*DiseaseIdentified) *UserUpdateOne {
+// AddDiseasesIdentified adds the "diseases_identified" edges to the DiseaseIdentified entity.
+func (uuo *UserUpdateOne) AddDiseasesIdentified(d ...*DiseaseIdentified) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return uuo.AddDiseaseIdentifiedIDs(ids...)
+	return uuo.AddDiseasesIdentifiedIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -297,25 +297,25 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearDiseaseIdentified clears all "disease_identified" edges to the DiseaseIdentified entity.
-func (uuo *UserUpdateOne) ClearDiseaseIdentified() *UserUpdateOne {
-	uuo.mutation.ClearDiseaseIdentified()
+// ClearDiseasesIdentified clears all "diseases_identified" edges to the DiseaseIdentified entity.
+func (uuo *UserUpdateOne) ClearDiseasesIdentified() *UserUpdateOne {
+	uuo.mutation.ClearDiseasesIdentified()
 	return uuo
 }
 
-// RemoveDiseaseIdentifiedIDs removes the "disease_identified" edge to DiseaseIdentified entities by IDs.
-func (uuo *UserUpdateOne) RemoveDiseaseIdentifiedIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveDiseaseIdentifiedIDs(ids...)
+// RemoveDiseasesIdentifiedIDs removes the "diseases_identified" edge to DiseaseIdentified entities by IDs.
+func (uuo *UserUpdateOne) RemoveDiseasesIdentifiedIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveDiseasesIdentifiedIDs(ids...)
 	return uuo
 }
 
-// RemoveDiseaseIdentified removes "disease_identified" edges to DiseaseIdentified entities.
-func (uuo *UserUpdateOne) RemoveDiseaseIdentified(d ...*DiseaseIdentified) *UserUpdateOne {
+// RemoveDiseasesIdentified removes "diseases_identified" edges to DiseaseIdentified entities.
+func (uuo *UserUpdateOne) RemoveDiseasesIdentified(d ...*DiseaseIdentified) *UserUpdateOne {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return uuo.RemoveDiseaseIdentifiedIDs(ids...)
+	return uuo.RemoveDiseasesIdentifiedIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -402,12 +402,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
-	if uuo.mutation.DiseaseIdentifiedCleared() {
+	if uuo.mutation.DiseasesIdentifiedCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),
@@ -415,12 +415,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedDiseaseIdentifiedIDs(); len(nodes) > 0 && !uuo.mutation.DiseaseIdentifiedCleared() {
+	if nodes := uuo.mutation.RemovedDiseasesIdentifiedIDs(); len(nodes) > 0 && !uuo.mutation.DiseasesIdentifiedCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),
@@ -431,12 +431,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.DiseaseIdentifiedIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.DiseasesIdentifiedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),

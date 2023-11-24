@@ -65,19 +65,19 @@ func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	return uc
 }
 
-// AddDiseaseIdentifiedIDs adds the "disease_identified" edge to the DiseaseIdentified entity by IDs.
-func (uc *UserCreate) AddDiseaseIdentifiedIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddDiseaseIdentifiedIDs(ids...)
+// AddDiseasesIdentifiedIDs adds the "diseases_identified" edge to the DiseaseIdentified entity by IDs.
+func (uc *UserCreate) AddDiseasesIdentifiedIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddDiseasesIdentifiedIDs(ids...)
 	return uc
 }
 
-// AddDiseaseIdentified adds the "disease_identified" edges to the DiseaseIdentified entity.
-func (uc *UserCreate) AddDiseaseIdentified(d ...*DiseaseIdentified) *UserCreate {
+// AddDiseasesIdentified adds the "diseases_identified" edges to the DiseaseIdentified entity.
+func (uc *UserCreate) AddDiseasesIdentified(d ...*DiseaseIdentified) *UserCreate {
 	ids := make([]uuid.UUID, len(d))
 	for i := range d {
 		ids[i] = d[i].ID
 	}
-	return uc.AddDiseaseIdentifiedIDs(ids...)
+	return uc.AddDiseasesIdentifiedIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -181,12 +181,12 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
 		_node.Password = value
 	}
-	if nodes := uc.mutation.DiseaseIdentifiedIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.DiseasesIdentifiedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.DiseaseIdentifiedTable,
-			Columns: user.DiseaseIdentifiedPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.DiseasesIdentifiedTable,
+			Columns: []string{user.DiseasesIdentifiedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(diseaseidentified.FieldID, field.TypeUUID),
