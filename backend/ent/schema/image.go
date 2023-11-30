@@ -4,8 +4,9 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 type Image struct {
@@ -15,7 +16,13 @@ type Image struct {
 func (Image) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("identifier"),
-		field.UUID("id", uuid.New()).Unique(),
 		field.Time("created_at").Default(time.Now),
+	}
+}
+
+func (Image) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("disease", Disease.Type),
+		edge.To("disease_identified", DiseaseIdentified.Type).Unique().Annotations(entsql.OnDelete(entsql.Cascade)).Required(),
 	}
 }

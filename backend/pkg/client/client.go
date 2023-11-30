@@ -33,8 +33,9 @@ func New() *Client {
 			db: dbClient.User,
 		},
 		IdentifiedDiseases: IdentifiedDiseases{
-			db:      dbClient.DiseaseIdentified,
-			storage: storageAdapter,
+			dbDiseaseIdentified: dbClient.DiseaseIdentified,
+			dbImage:             dbClient.Image,
+			storage:             storageAdapter,
 		},
 	}
 }

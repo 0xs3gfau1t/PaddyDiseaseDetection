@@ -12,7 +12,6 @@ import (
 	"segFault/PaddyDiseaseDetection/ent/diseaseidentified"
 	"segFault/PaddyDiseaseDetection/ent/user"
 
-	// "segFault/PaddyDiseaseDetection/ent/user"
 	"segFault/PaddyDiseaseDetection/pkg/helpers"
 	"segFault/PaddyDiseaseDetection/pkg/storage"
 	"segFault/PaddyDiseaseDetection/types"
@@ -29,8 +28,9 @@ type IdentifiedDiseasesClient interface {
 }
 
 type IdentifiedDiseases struct {
-	db      *ent.DiseaseIdentifiedClient
-	storage storage.Storage
+	dbDiseaseIdentified *ent.DiseaseIdentifiedClient
+	dbImage             *ent.ImageClient
+	storage             storage.Storage
 	// TODO: Maintain a channel or queue where failed db inserts are retried
 	// db_insert_failed_channel chan DbEntryType
 }
@@ -41,10 +41,11 @@ type ResultChannel struct {
 }
 
 type DbEntryType struct {
-	Entry    *ent.DiseaseIdentifiedCreate
-	Images   []string
-	Tries    uint8
-	MaxTries uint8
+	EntryDiseaseIdentified *ent.DiseaseIdentifiedCreate
+	EntryImages            *ent.ImageCreateBulk
+	Images                 []string
+	Tries                  uint8
+	MaxTries               uint8
 }
 
 func (idiseaseCli IdentifiedDiseases) UploadImage(image *multipart.FileHeader, userid string, resultChan chan ResultChannel, wg *sync.WaitGroup) {
@@ -110,7 +111,6 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		if result.Error == nil {
 			successfulUploads = append(successfulUploads, result.Filename)
 		} else {
-
 			log.Printf("[x] Failed uploading %v\n", result.Filename)
 			log.Println(result.Error)
 		}
@@ -119,13 +119,17 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		return types.ErrUploadFailed
 	}
 	userId, _ := uuid.Parse(userid)
+	newDbEnteryId := uuid.New()
 	dbEntry := &DbEntryType{
-		Entry:    idiseaseCli.db.Create().SetID(uuid.New()).SetPhotos(successfulUploads).SetStatus("queued").SetLocation("Nepal").SetUploadedByID(userId),
+		EntryDiseaseIdentified: idiseaseCli.dbDiseaseIdentified.Create().SetID(newDbEnteryId).SetStatus("queued").SetLocation("Nepal").SetUploadedByID(userId),
+		EntryImages: idiseaseCli.dbImage.MapCreateBulk(successfulUploads, func(ic *ent.ImageCreate, i int) {
+			ic.SetIdentifier(successfulUploads[i]).SetDiseaseIdentifiedID(newDbEnteryId)
+		}),
 		Images:   successfulUploads,
 		Tries:    1,
 		MaxTries: 5,
 	}
-	if err := dbEntry.Entry.Exec(context.Background()); err != nil {
+	if err := dbEntry.EntryDiseaseIdentified.Exec(context.Background()); err != nil {
 		log.Println("[x] Inserting to db failed")
 		go func() {
 			// idiseaseCli.db_insert_failed_channel <- *dbEntry
@@ -137,6 +141,15 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 			}
 		}()
 		return err
+	}
+
+	// TODO: Use transactions for both of them
+	if err := dbEntry.EntryImages.Exec(context.Background()); err != nil {
+		if err := idiseaseCli.dbDiseaseIdentified.DeleteOneID(newDbEnteryId).Exec(context.Background()); err == nil {
+			idiseaseCli.RollbackImageUploads(successfulUploads)
+		} else {
+			log.Printf("[x] Failed removing user submitted job %v\n", newDbEnteryId)
+		}
 	}
 
 	if len(successfulUploads) < len(images.Images) {
@@ -181,11 +194,14 @@ func (idiseaseCli IdentifiedDiseases) RollbackImageUploads(images []string) erro
 // Deletes entry on RemoveIdentifiedDisease table
 // Fails if the ml model is still processing on this item
 func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user_id string) error {
-	userId, _ := uuid.Parse(user_id)
-	photos, err := idiseaseCli.db.Query().Unique(true).Where(diseaseidentified.ID(id)).Where(diseaseidentified.HasUploadedByWith(user.ID(userId))).Where(diseaseidentified.StatusNEQ("processing")).First(context.Background())
-	log.Println(photos)
+	userId, err := uuid.Parse(user_id)
 	if err != nil {
-		log.Printf("[x] No entry found for %v. Maybe it's still being processed", id)
+		return err
+	}
+
+	identifiedInstance, err := idiseaseCli.dbDiseaseIdentified.Query().Unique(true).Where(diseaseidentified.ID(id)).Where(diseaseidentified.HasUploadedByWith(user.ID(userId))).Where(diseaseidentified.StatusNEQ("processing")).First(context.Background())
+	if err != nil {
+		log.Printf("[x] No entry found for %v. Maybe it's still being processed\n", id)
 
 		// Here is a weird design decision TODO. This error is pure http.StatusLocked or other
 		// Now how do we propel this error to response handler
@@ -193,14 +209,21 @@ func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user
 		// i.e anything that raises error from client module is being treated as 500 but it's got more than that
 		return err
 	}
-	err = idiseaseCli.db.DeleteOne(photos).Exec(context.Background())
+
+	photos, err := identifiedInstance.QueryImage().All(context.Background())
+	photosStr := make([]string, len(photos))
+	for i, photo := range photos {
+		photosStr[i] = photo.Identifier
+	}
+	if err = idiseaseCli.RollbackImageUploads(photosStr); err == nil {
+		if err = idiseaseCli.dbDiseaseIdentified.DeleteOne(identifiedInstance).Exec(context.Background()); err != nil {
+			log.Printf("[x] Couldn't delete %v. DBERROR\n", id)
+		}
+	}
 
 	if err != nil {
 		log.Printf("[x] Unable to delete disease_identified entry: %v\n", id)
 		return err
 	}
-	go func(photos []string) {
-		idiseaseCli.RollbackImageUploads(photos)
-	}(photos.Photos)
 	return nil
 }
