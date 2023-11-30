@@ -21,10 +21,10 @@ import (
 )
 
 type IdentifiedDiseasesClient interface {
-	UploadImage(*multipart.FileHeader, string, chan ResultChannel, *sync.WaitGroup)
-	UploadImages(*types.ImageUploadType, string) error
+	UploadImage(*multipart.FileHeader, *uuid.UUID, chan ResultChannel, *sync.WaitGroup)
+	UploadImages(*types.ImageUploadType, *uuid.UUID) error
 	RollbackImageUploads([]string) error
-	RemoveIdentifiedDisease(uuid.UUID, string) error
+	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
 }
 
 type IdentifiedDiseases struct {
@@ -48,7 +48,7 @@ type DbEntryType struct {
 	MaxTries               uint8
 }
 
-func (idiseaseCli IdentifiedDiseases) UploadImage(image *multipart.FileHeader, userid string, resultChan chan ResultChannel, wg *sync.WaitGroup) {
+func (idiseaseCli IdentifiedDiseases) UploadImage(image *multipart.FileHeader, userid *uuid.UUID, resultChan chan ResultChannel, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	if helpers.ToMB(image.Size) > constants.MAX_FILE_UPLOAD_LIMIT {
@@ -92,7 +92,7 @@ func (idiseaseCli IdentifiedDiseases) UploadImage(image *multipart.FileHeader, u
 
 }
 
-func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType, userid string) error {
+func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType, userid *uuid.UUID) error {
 	resultChan := make(chan ResultChannel)
 	var wg sync.WaitGroup
 	for _, image := range images.Images {
@@ -118,10 +118,9 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 	if len(successfulUploads) == 0 {
 		return types.ErrUploadFailed
 	}
-	userId, _ := uuid.Parse(userid)
 	newDbEnteryId := uuid.New()
 	dbEntry := &DbEntryType{
-		EntryDiseaseIdentified: idiseaseCli.dbDiseaseIdentified.Create().SetID(newDbEnteryId).SetStatus("queued").SetLocation("Nepal").SetUploadedByID(userId),
+		EntryDiseaseIdentified: idiseaseCli.dbDiseaseIdentified.Create().SetID(newDbEnteryId).SetStatus("queued").SetLocation("Nepal").SetUploadedByID(*userid),
 		EntryImages: idiseaseCli.dbImage.MapCreateBulk(successfulUploads, func(ic *ent.ImageCreate, i int) {
 			ic.SetIdentifier(successfulUploads[i]).SetDiseaseIdentifiedID(newDbEnteryId)
 		}),
@@ -193,13 +192,8 @@ func (idiseaseCli IdentifiedDiseases) RollbackImageUploads(images []string) erro
 
 // Deletes entry on RemoveIdentifiedDisease table
 // Fails if the ml model is still processing on this item
-func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user_id string) error {
-	userId, err := uuid.Parse(user_id)
-	if err != nil {
-		return err
-	}
-
-	identifiedInstance, err := idiseaseCli.dbDiseaseIdentified.Query().Unique(true).Where(diseaseidentified.ID(id)).Where(diseaseidentified.HasUploadedByWith(user.ID(userId))).Where(diseaseidentified.StatusNEQ("processing")).First(context.Background())
+func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user_id uuid.UUID) error {
+	identifiedInstance, err := idiseaseCli.dbDiseaseIdentified.Query().Unique(true).Where(diseaseidentified.ID(id)).Where(diseaseidentified.HasUploadedByWith(user.ID(user_id))).Where(diseaseidentified.StatusNEQ("processing")).First(context.Background())
 	if err != nil {
 		log.Printf("[x] No entry found for %v. Maybe it's still being processed\n", id)
 

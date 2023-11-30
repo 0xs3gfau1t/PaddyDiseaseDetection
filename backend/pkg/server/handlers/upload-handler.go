@@ -29,7 +29,7 @@ func UploadHandler(c echo.Context) error {
 		Images: form.File["images"],
 	}
 
-	if err := client.Cli.IdentifiedDiseases.UploadImages(&images, user.Id); err != nil {
+	if err := client.Cli.IdentifiedDiseases.UploadImages(&images, &user.Id); err != nil {
 		return c.JSONBlob(http.StatusInternalServerError, []byte(err.Error()))
 	}
 	return nil

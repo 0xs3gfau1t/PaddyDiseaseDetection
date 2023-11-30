@@ -4,6 +4,7 @@ import (
 	"mime/multipart"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
 type CreateUserValidInput struct {
@@ -20,8 +21,8 @@ type LoginUserValidInput struct {
 }
 
 type AuthenticatedUserRequestValues struct {
-	Email string `json:"email"`
-	Id    string `json:"id"`
+	Email string    `json:"email"`
+	Id    uuid.UUID `json:"id"`
 }
 
 type JwtType struct {

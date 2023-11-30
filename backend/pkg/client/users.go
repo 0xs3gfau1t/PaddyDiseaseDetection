@@ -65,7 +65,7 @@ func (u usercli) Login(validatedUser *types.LoginUserValidInput) (string, error)
 			IssuedAt:  time.Now().Unix(),
 		},
 		AuthenticatedUserRequestValues: types.AuthenticatedUserRequestValues{
-			Id:    userEntity.ID.String(),
+			Id:    userEntity.ID,
 			Email: userEntity.Email,
 		},
 	},
