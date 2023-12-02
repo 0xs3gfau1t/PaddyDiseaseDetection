@@ -36,7 +36,7 @@ func NewRabbit(test bool) func(string) error {
 
 	q, err := ch.QueueDeclare(
 		os.Getenv("RABBIT_QUEUE"), // name
-		false,                     // durable
+		true,                      // durable
 		false,                     // delete when unused
 		false,                     // exclusive
 		false,                     // no-wait
@@ -59,8 +59,9 @@ func NewRabbit(test bool) func(string) error {
 			false,  // mandatory
 			false,  // immediate
 			amqp091.Publishing{
-				ContentType: "text/plain",
-				Body:        []byte(body),
+				DeliveryMode: amqp091.Persistent,
+				ContentType:  "text/plain",
+				Body:         []byte(body),
 			})
 	}
 
