@@ -26,6 +26,10 @@ func New() *Client {
 	if err != nil {
 		log.Fatal("Couldn't initialize a database client")
 	}
+	rbtPublisher := config.NewRabbit(false)
+	if rbtPublisher == nil {
+		log.Println("[!] Couldn't initialize rabbit queue")
+	}
 
 	return &Client{
 		db: dbClient,
@@ -36,6 +40,7 @@ func New() *Client {
 			dbDiseaseIdentified: dbClient.DiseaseIdentified,
 			dbImage:             dbClient.Image,
 			storage:             storageAdapter,
+			rabbitPublisher:     rbtPublisher,
 		},
 	}
 }

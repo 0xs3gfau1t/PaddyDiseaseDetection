@@ -31,6 +31,7 @@ type IdentifiedDiseases struct {
 	dbDiseaseIdentified *ent.DiseaseIdentifiedClient
 	dbImage             *ent.ImageClient
 	storage             storage.Storage
+	rabbitPublisher     func(string) error
 	// TODO: Maintain a channel or queue where failed db inserts are retried
 	// db_insert_failed_channel chan DbEntryType
 }
@@ -149,6 +150,15 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		} else {
 			log.Printf("[x] Failed removing user submitted job %v\n", newDbEnteryId)
 		}
+	}
+
+	// Publish a message for ML workers to work on identification
+	if idiseaseCli.rabbitPublisher == nil {
+		log.Println("[!] No publisher found")
+		return types.ErrPublishFailed
+	}
+	if idiseaseCli.rabbitPublisher(newDbEnteryId.String()) != nil {
+		return types.ErrPublishFailed
 	}
 
 	if len(successfulUploads) < len(images.Images) {
