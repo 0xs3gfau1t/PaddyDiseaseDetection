@@ -13,7 +13,7 @@ func init() {
 }
 
 var serverCmd = &cobra.Command{
-	Use:    "server",
-	Short:  "Starts the backend server",
-	RunE:   func(cmd *cobra.Command, args []string) error { return server.Run(serverPort) },
+	Use:   "server",
+	Short: "Starts the backend server",
+	RunE:  func(cmd *cobra.Command, args []string) error { return server.Run(serverPort) },
 }
