@@ -1,12 +1,47 @@
 package location
 
 import (
+	"fmt"
+	"io"
+	"log"
 	"math"
+	"os"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/geojson"
+	"github.com/paulmach/orb/planar"
 )
 
+var fc = geojson.NewFeatureCollection()
+var c jsoniter.API
+
+func init() {
+	f, err := os.Open("nepal.geojson")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	geojsonData, err := io.ReadAll(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c = jsoniter.Config{
+		EscapeHTML:              true,
+		SortMapKeys:             false,
+		MarshalFloatWith6Digits: true,
+	}.Froze()
+
+	fc = geojson.NewFeatureCollection()
+	if err = c.Unmarshal(geojsonData, &fc); err != nil {
+		log.Fatal(err)
+	}
+}
+
 type LocationExtractor interface {
-	GetLocation() (Location, Location, error)
+	GetLocation() (Location, Location, error) // longitude latitude error
 }
 
 type Location struct {
@@ -50,4 +85,24 @@ func (loc *Location) FromFloat(numericValue float64, isLatitude bool) {
 	numericValue -= float64(loc.Minutes) / 60
 
 	loc.Seconds = numericValue * 60
+}
+
+func GetDistrict(longitude float64, latitude float64) string {
+	point := orb.Point{longitude, latitude}
+	fmt.Println(point)
+
+	for _, feature := range fc.Features {
+		switch g := feature.Geometry.(type) {
+		case orb.Polygon:
+			if planar.PolygonContains(g, point) {
+				x, ok := feature.Properties["DIST_EN"]
+				if ok {
+					return x.(string)
+				} else {
+					return "NOT FOUND"
+				}
+			}
+		}
+	}
+	return "NOT FOUND"
 }
