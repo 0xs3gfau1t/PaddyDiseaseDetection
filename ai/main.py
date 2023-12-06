@@ -39,8 +39,10 @@ class Supervisor:
                                           on_close_callback=self.onClose,
                                           )
 
+    def run(self):
+        mainLoop = threading.Thread(target=self.conn.ioloop.start, daemon=True)
         try:
-            self.conn.ioloop.start()
+            self.monitor()
         except KeyboardInterrupt:
             print("Closing connection")
             # Gracefully close the connection
@@ -48,14 +50,7 @@ class Supervisor:
             # Loop until we're fully closed.
             # The on_close callback is required to stop the io loop
             self.conn.ioloop.start()
-
-        # channel = self.conn.channel()
-        # channel.queue_declare(queue=self.queue, durable=True)
-        # channel.basic_consume(queue=self.queue,
-        #                       on_message_callback=self.callback)
-
-        # self.daemon = threading.Thread(target=channel.start_consuming, daemon=True)
-        # self.daemon.start()
+            mainLoop.join()
 
     # Step #2
     def onConnected(self, connection):
@@ -93,11 +88,11 @@ class Supervisor:
     def monitor(self):
         while True:
             activeWorkers = maxNWorkers - self.workerThreadsLock._value
-            print(f"{activeWorkers} workers on the job", end="\r", flush=True)
+            print(f"{activeWorkers} workers on the job")
             time.sleep(1) 
 
     def __del__(self):
         if self.conn != None:
             self.conn.close()
 
-Supervisor().monitor()
+Supervisor().run()

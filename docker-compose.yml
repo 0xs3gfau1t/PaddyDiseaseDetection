@@ -1,0 +1,96 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_NAME: postgres
+      DB_PASSWORD: postgres
+      RABBIT_HOST: rabbit
+      RABBIT_PORT: 5672
+      RABBIT_QUEUE: classify
+      RABIT_USER: guest
+      RABBIT_PASS: guest
+      SIGNING_SECRET: "d+l1r+99+zjHXVRPZxKcy9p+BbM45fPJXJqPlXZ8C3w="
+      LOCAL_ENV_PATH: ".env.docker-compose"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    links:
+      - db
+      - rabbit
+      - redis
+
+  ai:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_NAME: postgres
+      DB_PASS: postgres
+      RABBIT_HOST: rabbit
+      RABBIT_PORT: 5672
+      RABBIT_QUEUE: classify
+      RABBIT_USER: guest
+      RABBIT_PASS: guest
+      PRODUCTION: 0
+      MODEL_URL: "#"
+      ML_MODEL: "./paddy30.pth"
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    links:
+      - db
+      - rabbit
+
+  redis:
+    build:
+      context: ./backend/cache
+      dockerfile: Dockerfile
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbit:
+    image: rabbitmq:3.11.26-management
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 15672:15672
+
+  db:
+    image: postgres:15.5-bullseye
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

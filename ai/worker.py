@@ -12,7 +12,7 @@ class Worker:
     db = DbClient
     toIdentify: str
     host: str
-    tempFile: None | str = None
+    tempFile: str
 
     def __init__(self, id: str):
         self.toIdentify = id
@@ -40,8 +40,10 @@ class Worker:
     def classify(self):
         imageIdentifier = self.db().getImageIdentifier(self.toIdentify)
         if imageIdentifier != None: 
-            self.tempFile = self.getImagePath(imageIdentifier)
-            return myPred(self.tempFile)
+            tempFile = self.getImagePath(imageIdentifier)
+            if tempFile != None:
+                self.tempFile = tempFile
+                return myPred(self.tempFile)
 
     def getImagePath(self, identifier):
         conn = client.HTTPSConnection(self.host)

@@ -120,6 +120,7 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		return types.ErrUploadFailed
 	}
 	newDbEnteryId := uuid.New()
+	// TODO: get location(file, userId, req)
 	dbEntry := &DbEntryType{
 		EntryDiseaseIdentified: idiseaseCli.dbDiseaseIdentified.Create().SetID(newDbEnteryId).SetStatus("queued").SetLocation("Nepal").SetUploadedByID(*userid),
 		EntryImages: idiseaseCli.dbImage.MapCreateBulk(successfulUploads, func(ic *ent.ImageCreate, i int) {
@@ -157,7 +158,8 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		log.Println("[!] No publisher found")
 		return types.ErrPublishFailed
 	}
-	if idiseaseCli.rabbitPublisher(newDbEnteryId.String()) != nil {
+	if err := idiseaseCli.rabbitPublisher(newDbEnteryId.String()); err != nil {
+		log.Printf("[ ] Publish failed: %v\n", err)
 		return types.ErrPublishFailed
 	}
 

@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -16,7 +17,8 @@ func init() {
 
 // Param: test: true to close connection, used by startup test
 func NewRabbit(test bool) func(string) error {
-	conn, err := amqp091.Dial(os.Getenv("RABBIT_CONN_URL"))
+	connUrl := fmt.Sprintf("amqp://%v:%v/", os.Getenv("RABBIT_HOST"), os.Getenv("RABBIT_PORT"))
+	conn, err := amqp091.Dial(connUrl)
 	if err != nil {
 		log.Println("[x] Couldn't create a rabbit connection")
 		log.Println(err)

@@ -1,7 +1,9 @@
 node_modules/
 .env
+.env.docker-compose
 backend/ent/*
 !backend/ent/schema
 *.pth
 venv/
 **__pycache__**
+tmp/

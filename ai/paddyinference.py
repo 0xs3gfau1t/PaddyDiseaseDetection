@@ -1,6 +1,12 @@
+import os
 import torch
 from torchvision.io import read_image
 from torchvision import transforms
+
+modelPath = os.getenv("ML_MODEL")
+if modelPath == None:
+    print("No trained model found to import")
+    os._exit(1)
 
 diseases = ['bacterial_leaf_blight',
             'bacterial_leaf_streak',
@@ -20,7 +26,7 @@ diseases = ['bacterial_leaf_blight',
 model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights=None)
 model.eval()
 
-model.load_state_dict(torch.load("./paddy30.pth",map_location=torch.device('cpu')))
+model.load_state_dict(torch.load(modelPath,map_location=torch.device('cpu')))
 
 transform2 = transforms.Compose([
     transforms.ToPILImage(),
