@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -157,7 +158,18 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		log.Println("[!] No publisher found")
 		return types.ErrPublishFailed
 	}
-	if idiseaseCli.rabbitPublisher(newDbEnteryId.String()) != nil {
+	if signedUrl, err := idiseaseCli.storage.GetFilePath(successfulUploads[0]); err == nil {
+		if publishMsg, err := json.Marshal(types.PublishMessage{
+			Id:   newDbEnteryId.String(),
+			Link: signedUrl,
+		}); err == nil {
+			if idiseaseCli.rabbitPublisher(string(publishMsg)) != nil {
+				return types.ErrPublishFailed
+			}
+		} else {
+			return types.ErrPublishFailed
+		}
+	} else {
 		return types.ErrPublishFailed
 	}
 

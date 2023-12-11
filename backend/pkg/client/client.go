@@ -26,7 +26,7 @@ func New() *Client {
 	if err != nil {
 		log.Fatal("Couldn't initialize a database client")
 	}
-	rbtPublisher := config.NewRabbit(false)
+	rbtPublisher := config.Publisher
 	if rbtPublisher == nil {
 		log.Println("[!] Couldn't initialize rabbit queue")
 	}

@@ -1,11 +1,16 @@
+import json
 import time
 import os
 import threading
 import pika
 from pika.adapters.select_connection import SelectConnection
+from pika.amqp_object import Method
 from pika.channel import Channel
-
+from pika.connection import Connection
+from dotenv import load_dotenv
 from worker import Worker
+
+load_dotenv()
 
 maxNWorkers = 1
 
@@ -13,8 +18,9 @@ class Supervisor:
     workerThreadsLock = threading.Semaphore(maxNWorkers)
 
     conn: SelectConnection 
-    channel: Channel
-    rabbitQueue: str
+    channelConsumer: Channel
+    rabbitQueueConsumer: str
+    rabbitQueueProducer: str
     
     def __init__(self, workers=5):
         self.nWorkers = workers
@@ -23,12 +29,14 @@ class Supervisor:
         rabbitPort = os.getenv("RABBIT_PORT")
         rabbitUser = os.getenv("RABBIT_USER")
         rabbitPass = os.getenv("RABBIT_PASS")
-        rabbitQueue = os.getenv("RABBIT_QUEUE")
-        if not rabbitPort or not rabbitUser or not rabbitPass or not rabbitHost or not rabbitQueue:
+        rabbitQueueC = os.getenv("RABBIT_QUEUE_CONSUMER")
+        rabbitQueueP = os.getenv("RABBIT_QUEUE_PRODUCER")
+        if not rabbitPort or not rabbitUser or not rabbitPass or not rabbitHost or not rabbitQueueC or not rabbitQueueP:
             print("[x] No rabbit url found in env. Exiting")
             os._exit(1)
 
-        self.rabbitQueue = rabbitQueue
+        self.rabbitQueueConsumer = rabbitQueueC
+        self.rabbitQueueProducer = rabbitQueueP
 
         # Step #1
         pikaConn = pika.URLParameters(f"amqp://{rabbitUser}:{rabbitPass}@{rabbitHost}:{rabbitPort}")
@@ -40,7 +48,7 @@ class Supervisor:
                                           )
 
         try:
-            self.conn.ioloop.start()
+            self.mainLoop = threading.Thread(target=self.conn.ioloop.start, daemon=True)
         except KeyboardInterrupt:
             print("Closing connection")
             # Gracefully close the connection
@@ -49,55 +57,67 @@ class Supervisor:
             # The on_close callback is required to stop the io loop
             self.conn.ioloop.start()
 
-        # channel = self.conn.channel()
-        # channel.queue_declare(queue=self.queue, durable=True)
-        # channel.basic_consume(queue=self.queue,
-        #                       on_message_callback=self.callback)
-
-        # self.daemon = threading.Thread(target=channel.start_consuming, daemon=True)
-        # self.daemon.start()
+    def run(self):
+        self.mainLoop.start()
+        self.monitor()
 
     # Step #2
     def onConnected(self, connection):
         connection.channel(on_open_callback=self.onChannelOpen)
 
-    def onConnectedError(self, conn):
+    def onConnectedError(self, conn:Connection, excep):
         print("Error connecting: ", conn)
 
     # Step #3
-    def onChannelOpen(self, new_channel):
+    def onChannelOpen(self, new_channel:Channel):
         """Called when our channel has opened"""
-        self.channel = new_channel
-        self.channel.queue_declare(queue=self.rabbitQueue, durable=True, exclusive=False, auto_delete=False, callback=self.onQueueDeclared)
+        self.channelConsumer = new_channel
+        self.channelConsumer.queue_declare(queue=self.rabbitQueueConsumer, durable=True, exclusive=False, auto_delete=False, callback=self.onQueueDeclaredConsumer)
 
     def onClose(self, connection, exception):
         connection.ioloop.close()
 
     # Step #4
-    def onQueueDeclared(self, frame):
+    def onQueueDeclaredConsumer(self, frame):
         """Called when RabbitMQ has told us our Queue has been declared, frame is the response from RabbitMQ"""
-        self.channel.basic_consume(self.rabbitQueue, self.handleDelivery)
+        self.channelConsumer.basic_consume(self.rabbitQueueConsumer, self.handleDelivery)
 
     # Step #5
-    def handleDelivery(self, channel, method, header, body):
+    def handleDelivery(self, channel:Channel, method, header, body):
         """Called when we receive a message from RabbitMQ"""
-        self.workerThreadsLock.acquire()
         decodedBody = bytes.decode(body, encoding='utf-8')
-        newWorker = threading.Thread(target=Worker(decodedBody).run, args=(
-            self.workerThreadsLock.release,
-            channel.basic_ack,
-            method
-            ))
-        newWorker.start()
+        responseMessage = {"id": decodedBody, "disease": "N/A", "status": "processing"}
+
+        self.workerThreadsLock.acquire()
+        self.respond(json.dumps(responseMessage))
+        try:
+            self.respond(Worker(decodedBody).run())
+        except Exception as e:
+            print("Error: ", e)
+            responseMessage["status"] = "failed"
+            self.respond(json.dumps(responseMessage))
+        finally:
+            self.workerThreadsLock.release()
+            channel.basic_ack(delivery_tag=method.delivery_tag)
+
+    def respond(self, msg:str):
+        self.channelConsumer.basic_publish(
+                body=msg,
+                exchange="",
+                routing_key=self.rabbitQueueProducer
+                )
 
     def monitor(self):
         while True:
             activeWorkers = maxNWorkers - self.workerThreadsLock._value
             print(f"{activeWorkers} workers on the job", end="\r", flush=True)
+            if not self.mainLoop.is_alive():
+                print("Main worker dead. Reviving...")
+                self.mainLoop.run()
             time.sleep(1) 
 
     def __del__(self):
         if self.conn != None:
             self.conn.close()
 
-Supervisor().monitor()
+Supervisor().run()

@@ -33,3 +33,14 @@ type JwtType struct {
 type ImageUploadType struct {
 	Images []*multipart.FileHeader `json:"images"`
 }
+
+type PublishMessage struct {
+	Id   string `json:"id"`
+	Link string `json:"link"`
+}
+
+type ProcessedMessage struct {
+	Id      string `json:"id"`
+	Disease string `json:"disease"`
+	Status  string `json:"status"`
+}
