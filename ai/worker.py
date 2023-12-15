@@ -5,8 +5,7 @@ import requests
 from paddyinference import myPred
 
 class Worker:
-    link: str
-    tempFile: None | str = None
+    tempFile = None
 
     def __init__(self, parsedData):
         self.toIdentify = parsedData.get("id")
@@ -22,7 +21,7 @@ class Worker:
                 if response._content:
                     file.write(response._content)
 
-            self.tempFile = fName 
+            self.tempFile = fName
             disease = myPred(self.tempFile)
             print("Predicted: ", disease)
         return json.dumps({"id": self.toIdentify, "disease": disease, "status": "processed"})

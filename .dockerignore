@@ -1,0 +1,7 @@
+.git
+.husky
+__pycache__
+venv
+node_modules
+.env
+.env.example

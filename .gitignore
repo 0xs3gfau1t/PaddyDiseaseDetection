@@ -5,3 +5,4 @@ backend/ent/*
 *.pth
 venv/
 **__pycache__**
+.env.docker-compose
