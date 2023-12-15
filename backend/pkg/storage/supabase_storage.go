@@ -10,20 +10,20 @@ import (
 )
 
 type SupaBaseStorage struct {
-	client *sb_storage.Client
-	bucket string
+	Client *sb_storage.Client
+	Bucket string
 }
 
 func NewSupaBaseStorage(apiUrl string, token string, bucket string) *SupaBaseStorage {
 	return &SupaBaseStorage{
-		client: sb_storage.NewClient(apiUrl, token, nil),
-		bucket: bucket,
+		Client: sb_storage.NewClient(apiUrl, token, nil),
+		Bucket: bucket,
 	}
 }
 
 func (fs *SupaBaseStorage) AddFile(filename string, buffer []byte) error {
 	reader := bytes.NewReader(buffer)
-	res, err := fs.client.UploadFile(fs.bucket, filename, reader)
+	res, err := fs.Client.UploadFile(fs.Bucket, filename, reader)
 
 	if err != nil {
 		return fmt.Errorf("Failed to upload file:%w", err)
@@ -35,7 +35,7 @@ func (fs *SupaBaseStorage) AddFile(filename string, buffer []byte) error {
 }
 
 func (fs *SupaBaseStorage) RemoveFile(filename string) error {
-	res, err := fs.client.RemoveFile(fs.bucket, []string{filename})
+	res, err := fs.Client.RemoveFile(fs.Bucket, []string{filename})
 
 	if err != nil {
 		return fmt.Errorf("Failed to remove file:%w", err)
@@ -47,11 +47,11 @@ func (fs *SupaBaseStorage) RemoveFile(filename string) error {
 }
 
 func (fs *SupaBaseStorage) GetFileByte(filename string) ([]byte, error) {
-	return fs.client.DownloadFile(fs.bucket, filename)
+	return fs.Client.DownloadFile(fs.Bucket, filename)
 }
 
 func (fs *SupaBaseStorage) GetFilePath(filename string) (string, error) {
-	res, err := fs.client.CreateSignedUrl(fs.bucket, filename, int(time.Hour*3/time.Second))
+	res, err := fs.Client.CreateSignedUrl(fs.Bucket, filename, int(time.Hour*3/time.Second))
 	if err != nil {
 		return "", fmt.Errorf("Failed to create signed url:%w", err)
 	}

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"segFault/PaddyDiseaseDetection/pkg/client"
+	"segFault/PaddyDiseaseDetection/types"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -17,10 +17,10 @@ func JwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusForbidden, "No authorization token found")
 		}
 
-		token, err := jwt.ParseWithClaims(tokenString.Value, &client.JwtType{}, func(t *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString.Value, &types.JwtType{}, func(t *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("SIGNING_SECRET")), nil
 		})
-		claim, ok := token.Claims.(*client.JwtType)
+		claim, ok := token.Claims.(*types.JwtType)
 		if err != nil || !token.Valid || !ok {
 			log.Println(err, ok)
 			return c.JSON(http.StatusOK, map[string]string{
