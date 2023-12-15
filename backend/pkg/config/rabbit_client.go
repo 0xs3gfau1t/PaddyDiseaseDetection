@@ -9,7 +9,7 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-var ch *amqp091.Channel
+var QChannel *amqp091.Channel
 var producerQueue amqp091.Queue
 var consumerQueue amqp091.Queue
 
@@ -24,7 +24,7 @@ func init() {
 		return
 	}
 
-	ch, err = conn.Channel()
+	QChannel, err = conn.Channel()
 
 	if err != nil {
 		log.Println("[x] Couldn't create a rabbit channel")
@@ -33,7 +33,7 @@ func init() {
 		return
 	}
 
-	producerQueue, err = ch.QueueDeclare(
+	producerQueue, err = QChannel.QueueDeclare(
 		os.Getenv("RABBIT_QUEUE_PRODUCER"), // name
 		true,                               // durable
 		false,                              // delete when unused
@@ -42,7 +42,7 @@ func init() {
 		nil,                                // arguments
 	)
 
-	consumerQueue, err = ch.QueueDeclare(
+	consumerQueue, err = QChannel.QueueDeclare(
 		os.Getenv("RABBIT_QUEUE_CONSUMER"), // name
 		true,                               // durable
 		false,                              // delete when unused
@@ -64,7 +64,7 @@ func init() {
 func Publisher(body string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	return ch.PublishWithContext(ctx,
+	return QChannel.PublishWithContext(ctx,
 		"",                 // exchange
 		producerQueue.Name, // routing key
 		false,              // mandatory

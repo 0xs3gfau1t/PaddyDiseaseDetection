@@ -12,10 +12,8 @@ from worker import Worker
 
 load_dotenv()
 
-maxNWorkers = 1
-
 class Supervisor:
-    workerThreadsLock = threading.Semaphore(maxNWorkers)
+    
 
     conn: SelectConnection 
     channelConsumer: Channel
@@ -31,9 +29,14 @@ class Supervisor:
         rabbitPass = os.getenv("RABBIT_PASS")
         rabbitQueueC = os.getenv("RABBIT_QUEUE_CONSUMER")
         rabbitQueueP = os.getenv("RABBIT_QUEUE_PRODUCER")
-        if not rabbitPort or not rabbitUser or not rabbitPass or not rabbitHost or not rabbitQueueC or not rabbitQueueP:
+        maxNWorkers = os.getenv("MAX_ML_WORKERS")
+        if not rabbitPort or not rabbitUser or not rabbitPass or not rabbitHost or not rabbitQueueC or not rabbitQueueP or not maxNWorkers:
             print("[x] No rabbit url found in env. Exiting")
             os._exit(1)
+
+        self.maxNWorkers = int(maxNWorkers)
+        self.workerThreadsLock = threading.Semaphore(int(maxNWorkers))
+
 
         self.rabbitQueueConsumer = rabbitQueueC
         self.rabbitQueueProducer = rabbitQueueP
@@ -85,20 +88,24 @@ class Supervisor:
     # Step #5
     def handleDelivery(self, channel:Channel, method, header, body):
         """Called when we receive a message from RabbitMQ"""
-        decodedBody = bytes.decode(body, encoding='utf-8')
-        responseMessage = {"id": decodedBody, "disease": "N/A", "status": "processing"}
+        try:
+            parsedData = json.loads(bytes.decode(body, encoding='utf-8'))
+            responseMessage = {"id": parsedData.get("id"), "disease": "unknown", "status": "processing"}
+            # self.respond(json.dumps(responseMessage))
+        except:
+            print("Couldn't parse data")
+            return
 
         self.workerThreadsLock.acquire()
-        self.respond(json.dumps(responseMessage))
         try:
-            self.respond(Worker(decodedBody).run())
+            self.respond(Worker(parsedData).run())
         except Exception as e:
             print("Error: ", e)
             responseMessage["status"] = "failed"
             self.respond(json.dumps(responseMessage))
-        finally:
-            self.workerThreadsLock.release()
-            channel.basic_ack(delivery_tag=method.delivery_tag)
+
+        self.workerThreadsLock.release()
+        channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def respond(self, msg:str):
         self.channelConsumer.basic_publish(
@@ -109,7 +116,7 @@ class Supervisor:
 
     def monitor(self):
         while True:
-            activeWorkers = maxNWorkers - self.workerThreadsLock._value
+            activeWorkers = self.maxNWorkers - self.workerThreadsLock._value
             print(f"{activeWorkers} workers on the job", end="\r", flush=True)
             if not self.mainLoop.is_alive():
                 print("Main worker dead. Reviving...")

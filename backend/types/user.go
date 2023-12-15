@@ -40,7 +40,7 @@ type PublishMessage struct {
 }
 
 type ProcessedMessage struct {
-	Id      string `json:"id"`
-	Disease string `json:"disease"`
-	Status  string `json:"status"`
+	Id      uuid.UUID `json:"id"`
+	Disease string    `json:"disease"`
+	Status  string    `json:"status"`
 }

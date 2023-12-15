@@ -8,15 +8,14 @@ class Worker:
     link: str
     tempFile: None | str = None
 
-    def __init__(self, jsonData: str):
-        parsedData = json.loads(jsonData)
+    def __init__(self, parsedData):
         self.toIdentify = parsedData.get("id")
         self.link = parsedData.get("link")
 
     def run(self) -> str:
         # Synchronous high time/resource consuming operation
         response = requests.get(self.link)
-        disease = "N/A"
+        disease = "unknown"
         if response.status_code == 200:
             fName = self.toIdentify+"-image"
             with open(fName, "wb") as file:
@@ -25,7 +24,8 @@ class Worker:
 
             self.tempFile = fName 
             disease = myPred(self.tempFile)
-        return json.dumps({"id": self.toIdentify, "disease": disease})
+            print("Predicted: ", disease)
+        return json.dumps({"id": self.toIdentify, "disease": disease, "status": "processed"})
 
     def __del__(self):
         if self.tempFile != None:

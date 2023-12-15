@@ -12,12 +12,17 @@ type Client struct {
 	db                 *ent.Client
 	User               UserClient
 	IdentifiedDiseases IdentifiedDiseasesClient
+	MlConsumer         MlConsumerClient
 }
 
 var Cli *Client
 
 func init() {
 	Cli = New()
+	go func() {
+		log.Println("[+] Starting response consumer")
+		Cli.MlConsumer.Run()
+	}()
 }
 
 func New() *Client {
@@ -41,6 +46,11 @@ func New() *Client {
 			dbImage:             dbClient.Image,
 			storage:             storageAdapter,
 			rabbitPublisher:     rbtPublisher,
+		},
+		MlConsumer: MlConsumer{
+			dbDisease:           dbClient.Disease,
+			dbDiseaseIdentified: dbClient.DiseaseIdentified,
+			channel:             config.QChannel,
 		},
 	}
 }
