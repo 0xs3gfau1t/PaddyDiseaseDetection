@@ -6,6 +6,7 @@ import (
 	"os"
 	"segFault/PaddyDiseaseDetection/ent"
 	"segFault/PaddyDiseaseDetection/ent/user"
+	"segFault/PaddyDiseaseDetection/types"
 	"time"
 	"unicode/utf8"
 
@@ -14,35 +15,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type CreateUserValidInput struct {
-	Name     string `form:"name"`
-	Email    string `form:"email"`
-	Location string `form:"location"`
-	Coord    string `form:"coord"`
-	Password string `form:"password"`
-}
-
-type LoginUserValidInput struct {
-	Email    string `form:"email"`
-	Password string `form:"password"`
-}
-
-type AuthenticatedUserRequestValues struct {
-	Email string `json:"email"`
-	Id    string `json:"id"`
-}
-
-type JwtType struct {
-	jwt.StandardClaims
-	AuthenticatedUserRequestValues
-}
-
 type UserClient interface {
-	UserDetails(id uuid.UUID) (*ent.User, error)
-	CreateUser(validatedUser *CreateUserValidInput) (*ent.User, error)
-	HashPassword(unhashed string) ([]byte, error)
-	CompareHashedPassword(unhashed string, hashed string) error
-	Login(validatedInput *LoginUserValidInput) (string, error)
+	UserDetails(uuid.UUID) (*ent.User, error)
+	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
+	HashPassword(string) ([]byte, error)
+	CompareHashedPassword(string, string) error
+	Login(*types.LoginUserValidInput) (string, error)
 }
 
 type usercli struct {
@@ -53,7 +31,7 @@ func (u usercli) UserDetails(id uuid.UUID) (*ent.User, error) {
 	return u.db.Get(context.Background(), id)
 }
 
-func (u usercli) CreateUser(validatedUser *CreateUserValidInput) (*ent.User, error) {
+func (u usercli) CreateUser(validatedUser *types.CreateUserValidInput) (*ent.User, error) {
 	toBeInsertedUser := u.db.Create()
 	toBeInsertedUser.SetID(uuid.New()) // This line might cause server to crash however unlikely
 	toBeInsertedUser.SetName(validatedUser.Name)
@@ -69,10 +47,7 @@ func (u usercli) CreateUser(validatedUser *CreateUserValidInput) (*ent.User, err
 	return toBeInsertedUser.Save(context.Background())
 }
 
-func (u usercli) Login(validatedUser *LoginUserValidInput) (string, error) {
-	// ALTERNATIVE: Instead of first fetching and comparing,
-	// How about, fetching with hashed password?
-	// Also, we should use echo's context instead of background
+func (u usercli) Login(validatedUser *types.LoginUserValidInput) (string, error) {
 	userEntity, err := u.db.Query().Unique(true).Where(user.Email(validatedUser.Email)).Select(user.FieldPassword, user.FieldID, user.FieldEmail).First(context.Background())
 	if err != nil {
 		return "", err
@@ -84,13 +59,13 @@ func (u usercli) Login(validatedUser *LoginUserValidInput) (string, error) {
 		return "", err
 	}
 
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, &JwtType{
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, &types.JwtType{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Unix() + 30*24*60*60,
 			IssuedAt:  time.Now().Unix(),
 		},
-		AuthenticatedUserRequestValues: AuthenticatedUserRequestValues{
-			Id:    userEntity.ID.String(),
+		AuthenticatedUserRequestValues: types.AuthenticatedUserRequestValues{
+			Id:    userEntity.ID,
 			Email: userEntity.Email,
 		},
 	},

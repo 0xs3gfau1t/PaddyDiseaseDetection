@@ -9,7 +9,7 @@ import (
 )
 
 type LocalStorage struct {
-	rootFolder string
+	RootFolder string
 }
 
 func NewLocalStorage(rootFilePath string) (*LocalStorage, error) {
@@ -20,12 +20,12 @@ func NewLocalStorage(rootFilePath string) (*LocalStorage, error) {
 	}
 
 	return &LocalStorage{
-		rootFolder: folderPath,
+		RootFolder: folderPath,
 	}, nil
 }
 
 func (fs *LocalStorage) AddFile(filename string, buffer []byte) error {
-	filepath := path.Join(fs.rootFolder, filename)
+	filepath := path.Join(fs.RootFolder, filename)
 
 	file, err := os.Create(filepath)
 	if err != nil {
@@ -44,13 +44,13 @@ func (fs *LocalStorage) AddFile(filename string, buffer []byte) error {
 }
 
 func (fs *LocalStorage) RemoveFile(filename string) error {
-	filepath := path.Join(fs.rootFolder, filename)
+	filepath := path.Join(fs.RootFolder, filename)
 
 	return os.Remove(filepath)
 }
 
 func (fs *LocalStorage) GetFileByte(filename string) ([]byte, error) {
-	filepath := path.Join(fs.rootFolder, filename)
+	filepath := path.Join(fs.RootFolder, filename)
 
 	f, err := os.Open(filepath)
 	if err != nil {
@@ -62,5 +62,5 @@ func (fs *LocalStorage) GetFileByte(filename string) ([]byte, error) {
 }
 
 func (fs *LocalStorage) GetFilePath(filename string) (string, error) {
-	return path.Join(fs.rootFolder, filename), nil
+	return path.Join(fs.RootFolder, filename), nil
 }

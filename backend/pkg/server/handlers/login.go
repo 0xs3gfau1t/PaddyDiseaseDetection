@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"segFault/PaddyDiseaseDetection/pkg/client"
+	"segFault/PaddyDiseaseDetection/types"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,7 @@ type LoginReturn struct {
 }
 
 func LoginHandler(c echo.Context) error {
-	var formattedInput client.LoginUserValidInput
+	var formattedInput types.LoginUserValidInput
 	c.Bind(&formattedInput)
 	jwt, err := client.Cli.User.Login(&formattedInput)
 	if err != nil {
