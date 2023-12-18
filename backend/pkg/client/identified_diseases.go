@@ -8,12 +8,14 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
+	"net/http"
 	"segFault/PaddyDiseaseDetection/constants"
 	"segFault/PaddyDiseaseDetection/ent"
 	"segFault/PaddyDiseaseDetection/ent/diseaseidentified"
 	"segFault/PaddyDiseaseDetection/ent/user"
 
 	"segFault/PaddyDiseaseDetection/pkg/helpers"
+	"segFault/PaddyDiseaseDetection/pkg/location"
 	"segFault/PaddyDiseaseDetection/pkg/storage"
 	"segFault/PaddyDiseaseDetection/types"
 	"sync"
@@ -23,7 +25,7 @@ import (
 
 type IdentifiedDiseasesClient interface {
 	UploadImage(*multipart.FileHeader, *uuid.UUID, chan ResultChannel, *sync.WaitGroup)
-	UploadImages(*types.ImageUploadType, *uuid.UUID) error
+	UploadImages(*types.ImageUploadType, *uuid.UUID, *http.Request) error
 	RollbackImageUploads([]string) error
 	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
 }
@@ -94,7 +96,7 @@ func (idiseaseCli IdentifiedDiseases) UploadImage(image *multipart.FileHeader, u
 
 }
 
-func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType, userid *uuid.UUID) error {
+func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType, userid *uuid.UUID, request *http.Request) error {
 	resultChan := make(chan ResultChannel)
 	var wg sync.WaitGroup
 	for _, image := range images.Images {
@@ -121,8 +123,9 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		return types.ErrUploadFailed
 	}
 	newDbEnteryId := uuid.New()
+	loc := location.GetLocation(images, request, *userid, Cli.db)
 	dbEntry := &DbEntryType{
-		EntryDiseaseIdentified: idiseaseCli.dbDiseaseIdentified.Create().SetID(newDbEnteryId).SetStatus("queued").SetLocation("Nepal").SetUploadedByID(*userid),
+		EntryDiseaseIdentified: idiseaseCli.dbDiseaseIdentified.Create().SetID(newDbEnteryId).SetStatus("queued").SetLocation(loc).SetUploadedByID(*userid),
 		EntryImages: idiseaseCli.dbImage.MapCreateBulk(successfulUploads, func(ic *ent.ImageCreate, i int) {
 			ic.SetIdentifier(successfulUploads[i]).SetDiseaseIdentifiedID(newDbEnteryId)
 		}),
