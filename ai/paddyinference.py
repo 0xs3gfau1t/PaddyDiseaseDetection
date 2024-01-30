@@ -1,7 +1,10 @@
 import os
+from dotenv import load_dotenv
 import torch
 from torchvision.io import read_image
 from torchvision import transforms
+
+load_dotenv()
 
 diseases = ['bacterial_leaf_blight',
             'bacterial_leaf_streak',
