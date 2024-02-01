@@ -2,11 +2,7 @@ import { FC } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import pages from "../constants/screens";
 
-type Props = {
-  navigation: any;
-};
-
-const LandingScreen: FC<Props> = ({ navigation }) => {
+const LandingScreen: FC<NavProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image
@@ -20,7 +16,7 @@ const LandingScreen: FC<Props> = ({ navigation }) => {
       <View style={{ paddingVertical: 30 }}>
         <Text
           style={styles.btn}
-          onPress={() => navigation.navigate(pages.signup)}
+          onPress={() => navigation.navigate(pages.login)}
         >
           Get Started
         </Text>

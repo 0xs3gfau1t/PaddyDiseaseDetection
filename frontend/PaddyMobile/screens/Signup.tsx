@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
-import signUpPost from "../api/auth/signup";
+import { FC, useState } from "react";
+import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
+import { signUpPost } from "../api/auth/signup";
+import pages from "../constants/screens";
 
-export default function SignupScreen() {
+const SignupScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({
     name: "",
     location: "",
@@ -29,11 +30,13 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Create a new account</Text>
+      <Image source={require("../assets/icons/tea.png")} style={styles.img} />
       <View style={styles.inputContainer}>
         <TextInput
           onChangeText={(e) => handleChange("name", e)}
           placeholder="Name"
           style={styles.inp}
+          autoFocus
         />
         <TextInput
           onChangeText={(e) => handleChange("location", e)}
@@ -45,27 +48,41 @@ export default function SignupScreen() {
           placeholder="Email"
           style={styles.inp}
           keyboardType="email-address"
-          autoFocus
         />
         <TextInput
           onChangeText={(e) => handleChange("password", e)}
           placeholder="Password"
           style={styles.inp}
-          keyboardType="visible-password"
+          secureTextEntry
         />
         <TextInput
           onChangeText={(e) => handleChange("rePassword", e)}
           placeholder="Retype Password"
           style={styles.inp}
-          keyboardType="visible-password"
+          secureTextEntry
         />
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+          }}
+        >
+          <Text>Already have an account? </Text>
+          <Text
+            style={{ textDecorationLine: "underline", fontWeight: "bold" }}
+            onPress={() => navigation.navigate(pages.login)}
+          >
+            Login
+          </Text>
+        </View>
       </View>
       <View style={{ width: "50%" }}>
         <Button title="Signup" color={"purple"} onPress={handleSignUp} />
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -76,6 +93,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 30,
+    fontWeight: "bold",
   },
   inputContainer: {
     display: "flex",
@@ -91,4 +109,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: "100%",
   },
+  img: {
+    position: "absolute",
+    width: "100%",
+    opacity: 0.2,
+  },
 });
+
+export default SignupScreen;

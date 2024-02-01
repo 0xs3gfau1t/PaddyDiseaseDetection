@@ -1,3 +1,4 @@
+import * as SecureStore from "expo-secure-store";
 import endpoints from "../../constants/endpoints";
 
 export type SignUpProps = {
@@ -7,7 +8,12 @@ export type SignUpProps = {
   location: string;
 };
 
-export default async function signUpPost(info: SignUpProps) {
+export type LoginProps = {
+  email: string;
+  password: string;
+};
+
+export async function signUpPost(info: SignUpProps) {
   try {
     const formData = new FormData();
     Object.entries(info).forEach(([key, val]) => {
@@ -25,5 +31,39 @@ export default async function signUpPost(info: SignUpProps) {
   } catch (e) {
     console.error(e);
     return { good: false, message: "Couldn't signup" };
+  }
+}
+
+export async function loginPost(info: LoginProps) {
+  try {
+    const formData = new FormData();
+    Object.entries(info).forEach(([key, val]) => {
+      formData.append(key, val);
+    });
+
+    const res = await fetch(endpoints.auth.login, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw await res.json();
+
+    const { accessToken }: { accessToken: string } = await res.json();
+
+    return { good: true, message: "Logged in successfully", accessToken };
+  } catch (e) {
+    console.error(e);
+    return { good: false, message: "Couldn't login" };
+  }
+}
+
+export async function logout() {
+  try {
+    await SecureStore.deleteItemAsync("accessToken");
+
+    return { good: true, message: "Logged Out" };
+  } catch (e) {
+    console.error(e);
+    return { good: false, message: "Couldn't logout" };
   }
 }
