@@ -4,7 +4,6 @@ import os
 import threading
 import pika
 from pika.adapters.select_connection import SelectConnection
-from pika.amqp_object import Method
 from pika.channel import Channel
 from pika.connection import Connection
 from dotenv import load_dotenv
