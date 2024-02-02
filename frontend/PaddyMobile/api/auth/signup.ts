@@ -1,5 +1,5 @@
-import * as SecureStore from "expo-secure-store";
-import endpoints from "../../constants/endpoints";
+import * as SecureStore from 'expo-secure-store';
+import endpoints from '../../constants/endpoints';
 
 export type SignUpProps = {
   email: string;
@@ -21,13 +21,13 @@ export async function signUpPost(info: SignUpProps) {
     });
 
     const res = await fetch(endpoints.auth.signup, {
-      method: "POST",
+      method: 'POST',
       body: formData,
     });
 
     if (!res.ok) throw await res.json();
 
-    return { good: true, message: "Signed up successfully" };
+    return { good: true, message: 'Signed up successfully' };
   } catch (e) {
     console.error(e);
     return { good: false, message: "Couldn't signup" };
@@ -42,7 +42,7 @@ export async function loginPost(info: LoginProps) {
     });
 
     const res = await fetch(endpoints.auth.login, {
-      method: "POST",
+      method: 'POST',
       body: formData,
     });
 
@@ -50,7 +50,7 @@ export async function loginPost(info: LoginProps) {
 
     const { accessToken }: { accessToken: string } = await res.json();
 
-    return { good: true, message: "Logged in successfully", accessToken };
+    return { good: true, message: 'Logged in successfully', accessToken };
   } catch (e) {
     console.error(e);
     return { good: false, message: "Couldn't login" };
@@ -59,9 +59,9 @@ export async function loginPost(info: LoginProps) {
 
 export async function logout() {
   try {
-    await SecureStore.deleteItemAsync("accessToken");
+    await SecureStore.deleteItemAsync('accessToken');
 
-    return { good: true, message: "Logged Out" };
+    return { good: true, message: 'Logged Out' };
   } catch (e) {
     console.error(e);
     return { good: false, message: "Couldn't logout" };

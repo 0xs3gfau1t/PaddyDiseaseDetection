@@ -1,14 +1,14 @@
-import { FC, useState } from "react";
-import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
-import { loginPost } from "../api/auth/signup";
-import pages from "../constants/screens";
-import { NavProps } from "../types/misc";
-import { useAuthContext } from "../contexts/auth/auth-provider";
+import { FC, useState } from 'react';
+import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { loginPost } from '../api/auth/signup';
+import pages from '../constants/screens';
+import { NavProps } from '../types/misc';
+import { useAuthContext } from '../contexts/auth/auth-provider';
 
 const LoginScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   const { setToken } = useAuthContext();
@@ -27,39 +27,39 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Login</Text>
-      <Image source={require("../assets/icons/tea.png")} style={styles.img} />
+      <Image source={require('../assets/icons/tea.png')} style={styles.img} />
       <View style={styles.inputContainer}>
         <TextInput
-          onChangeText={(e) => handleChange("email", e)}
-          placeholder="Email"
+          onChangeText={(e) => handleChange('email', e)}
+          placeholder='Email'
           style={styles.inp}
-          keyboardType="email-address"
+          keyboardType='email-address'
           autoFocus
         />
         <TextInput
-          onChangeText={(e) => handleChange("password", e)}
-          placeholder="Password"
+          onChangeText={(e) => handleChange('password', e)}
+          placeholder='Password'
           style={styles.inp}
           secureTextEntry
         />
       </View>
       <View
         style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
         }}
       >
         <Text>Don't have an account? </Text>
         <Text
-          style={{ textDecorationLine: "underline", fontWeight: "bold" }}
+          style={{ textDecorationLine: 'underline', fontWeight: 'bold' }}
           onPress={() => navigation.navigate(pages.signup)}
         >
           Signup
         </Text>
       </View>
-      <View style={{ width: "50%" }}>
-        <Button title="Login" color={"purple"} onPress={handleLogin} />
+      <View style={{ width: '50%' }}>
+        <Button title='Login' color={'purple'} onPress={handleLogin} />
       </View>
     </View>
   );
@@ -67,34 +67,34 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
-    justifyContent: "space-around",
-    alignItems: "center",
-    height: "100%",
-    position: "relative",
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: '100%',
+    position: 'relative',
   },
   heading: {
     fontSize: 30,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     letterSpacing: 5,
   },
   inputContainer: {
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
     gap: 10,
-    width: "60%",
+    width: '60%',
   },
   inp: {
     borderWidth: 1,
     borderRadius: 10,
-    borderColor: "purple",
+    borderColor: 'purple',
     paddingVertical: 5,
-    textAlign: "center",
-    width: "100%",
+    textAlign: 'center',
+    width: '100%',
   },
   img: {
-    position: "absolute",
-    width: "100%",
+    position: 'absolute',
+    width: '100%',
     opacity: 0.2,
   },
 });

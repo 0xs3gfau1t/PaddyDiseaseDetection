@@ -1,4 +1,4 @@
-const API_ROOT = "http://192.168.10.104:3000/api";
+const API_ROOT = 'http://192.168.10.104:3000/api';
 
 const endpoints = {
   auth: {

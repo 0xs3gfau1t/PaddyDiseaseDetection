@@ -1,4 +1,4 @@
-import { AuthState } from "../misc";
+import { AuthState } from '../misc';
 
 export type AuthContextType = {
   setToken: (token: string) => void;
