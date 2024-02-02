@@ -4,6 +4,7 @@
     "strict": true,
     "paths": {
       "@/*": ["."]
-    }
+    },
+    "jsx": "react-jsx"
   }
 }

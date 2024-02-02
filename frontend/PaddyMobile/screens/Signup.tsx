@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
 import { signUpPost } from "../api/auth/signup";
 import pages from "../constants/screens";
+import { NavProps } from "../types/misc";
 
 const SignupScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({

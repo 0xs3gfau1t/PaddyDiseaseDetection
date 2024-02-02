@@ -1,23 +1,13 @@
-import { useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
-import useAuthContext from "../hooks/authContext";
-
-type ProfileProps = {
-  loading: boolean;
-  profileInfo: { name: string; email: string } | null;
-};
+import { useAuthContext } from "../contexts/auth/auth-provider";
 
 const ProfileScreen = () => {
-  const { logout } = useAuthContext();
-  const [profileData, setProfileData] = useState<ProfileProps>({
-    loading: false,
-    profileInfo: { name: "Sam", email: "thicc_sam@gmail.com" },
-  });
+  const { removeToken, userData } = useAuthContext();
 
   return (
     <View style={styles.container}>
-      <Text>Hello, {profileData.profileInfo?.name}</Text>
-      <Button onPress={logout} title="Logout" />
+      <Text>Hello, {userData?.name}</Text>
+      <Button onPress={removeToken} title="Logout" />
     </View>
   );
 };

@@ -2,7 +2,8 @@ import { FC, useState } from "react";
 import { Button, Image, StyleSheet, Text, TextInput, View } from "react-native";
 import { loginPost } from "../api/auth/signup";
 import pages from "../constants/screens";
-import useAuthContext from "../hooks/authContext";
+import { NavProps } from "../types/misc";
+import { useAuthContext } from "../contexts/auth/auth-provider";
 
 const LoginScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({
@@ -10,7 +11,7 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
     password: "",
   });
 
-  const { login } = useAuthContext();
+  const { setToken } = useAuthContext();
 
   function handleChange(name: string, value: string) {
     setInfo((i) => ({ ...i, [name]: value }));
@@ -19,10 +20,8 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
   async function handleLogin() {
     const { message, accessToken } = await loginPost(info);
 
-    if (accessToken) {
-      login(accessToken);
-      navigation.navigate(pages.profile);
-    } else alert(message);
+    if (accessToken) setToken(accessToken);
+    else alert(message);
   }
 
   return (

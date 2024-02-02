@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import pages from "../constants/screens";
+import { NavProps } from "../types/misc";
 
 const LandingScreen: FC<NavProps> = ({ navigation }) => {
   return (
