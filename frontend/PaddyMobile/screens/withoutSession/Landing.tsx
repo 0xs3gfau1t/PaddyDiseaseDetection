@@ -1,12 +1,12 @@
+import pages from '@/constants/screens';
+import { NavProps } from '@/types/misc';
 import { FC } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import pages from '../constants/screens';
-import { NavProps } from '../types/misc';
 
 const LandingScreen: FC<NavProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/illustrations/water.gif')} style={styles.image} />
+      <Image source={require('@/assets/illustrations/water.gif')} style={styles.image} />
       <View style={{ position: 'absolute', top: '40%', gap: 10 }}>
         <Text style={{ ...styles.appName, fontSize: 70 }}>कृषक</Text>
         <Text style={styles.appName}>नेपलिले नेपाल लाई </Text>

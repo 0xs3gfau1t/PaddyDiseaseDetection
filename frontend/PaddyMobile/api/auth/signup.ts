@@ -1,5 +1,5 @@
+import endpoints from '@/constants/endpoints';
 import * as SecureStore from 'expo-secure-store';
-import endpoints from '../../constants/endpoints';
 
 export type SignUpProps = {
   email: string;

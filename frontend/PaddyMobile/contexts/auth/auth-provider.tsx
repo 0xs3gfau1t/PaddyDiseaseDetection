@@ -1,9 +1,9 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import { AuthState } from '../../types/misc';
 import { deleteItemAsync, getItem, setItem } from 'expo-secure-store';
-import { getLoggedInProfileInfo } from '../../api/profile/getProfile';
-import { TOKEN_HOLDER } from '../../constants/auth';
-import { AuthContextType } from '../../types/contexts/auth';
+import { AuthContextType } from '@/types/contexts/auth';
+import { AuthState } from '@/types/misc';
+import { TOKEN_HOLDER } from '@/constants/auth';
+import { getLoggedInProfileInfo } from '@/api/profile/getProfile';
 
 export const AuthContext = createContext({
   isFetching: true,

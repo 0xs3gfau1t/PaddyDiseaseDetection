@@ -1,7 +1,7 @@
+import { useAuthContext } from '@/contexts/auth/auth-provider';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { useAuthContext } from '../contexts/auth/auth-provider';
 
-const ProfileScreen = () => {
+export default function ProfileScreen() {
   const { removeToken, userData } = useAuthContext();
 
   return (
@@ -10,7 +10,7 @@ const ProfileScreen = () => {
       <Button onPress={removeToken} title='Logout' />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -20,5 +20,3 @@ const styles = StyleSheet.create({
     gap: 50,
   },
 });
-
-export default ProfileScreen;

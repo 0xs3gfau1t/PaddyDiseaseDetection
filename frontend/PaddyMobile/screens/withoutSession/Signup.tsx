@@ -1,8 +1,8 @@
+import { signUpPost } from '@/api/auth/signup';
+import pages from '@/constants/screens';
+import { NavProps } from '@/types/misc';
 import { FC, useState } from 'react';
 import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
-import { signUpPost } from '../api/auth/signup';
-import pages from '../constants/screens';
-import { NavProps } from '../types/misc';
 
 const SignupScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({
@@ -29,7 +29,7 @@ const SignupScreen: FC<NavProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Create a new account</Text>
-      <Image source={require('../assets/icons/tea.png')} style={styles.img} />
+      <Image source={require('@/assets/icons/tea.png')} style={styles.img} />
       <View style={styles.inputContainer}>
         <TextInput
           onChangeText={(e) => handleChange('name', e)}

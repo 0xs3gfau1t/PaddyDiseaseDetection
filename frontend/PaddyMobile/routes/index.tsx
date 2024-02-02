@@ -1,8 +1,8 @@
 import { NavigationContainer } from '@react-navigation/native';
-import LoadingScreen from '../components/Loading';
-import { useAuthContext } from '../contexts/auth/auth-provider';
 import AuthRoutes from './AuthRoutes';
 import NonAuthRoutes from './NonAuthRoutes';
+import { useAuthContext } from '@/contexts/auth/auth-provider';
+import LoadingScreen from '@/components/Loading';
 
 export default function Root() {
   const auth = useAuthContext();

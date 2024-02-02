@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import pages from '../constants/screens';
-import LoginScreen from '../screens/Login';
-import SignupScreen from '../screens/Signup';
-import LandingScreen from '../screens/Landing';
+import LandingScreen from '@/screens/withoutSession/Landing';
+import SignupScreen from '@/screens/withoutSession/Signup';
+import LoginScreen from '@/screens/withoutSession/Login';
 
 const Stack = createNativeStackNavigator();
 export default function NonAuthRoutes() {

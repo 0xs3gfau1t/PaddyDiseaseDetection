@@ -1,9 +1,9 @@
+import { loginPost } from '@/api/auth/signup';
+import pages from '@/constants/screens';
+import { useAuthContext } from '@/contexts/auth/auth-provider';
+import { NavProps } from '@/types/misc';
 import { FC, useState } from 'react';
 import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
-import { loginPost } from '../api/auth/signup';
-import pages from '../constants/screens';
-import { NavProps } from '../types/misc';
-import { useAuthContext } from '../contexts/auth/auth-provider';
 
 const LoginScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({
@@ -27,7 +27,7 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Login</Text>
-      <Image source={require('../assets/icons/tea.png')} style={styles.img} />
+      <Image source={require('@/assets/icons/tea.png')} style={styles.img} />
       <View style={styles.inputContainer}>
         <TextInput
           onChangeText={(e) => handleChange('email', e)}
