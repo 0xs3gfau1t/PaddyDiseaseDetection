@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
   },
   history: {
     width: '95%',
-    alignItems: 'center',
     gap: 2,
     alignSelf: 'center',
   },
