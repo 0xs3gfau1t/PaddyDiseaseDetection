@@ -3,13 +3,14 @@ import pages from '@/constants/screens';
 import { useAuthContext } from '@/contexts/auth/auth-provider';
 import { NavProps } from '@/types/misc';
 import { FC, useState } from 'react';
-import { Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const LoginScreen: FC<NavProps> = ({ navigation }) => {
   const [info, setInfo] = useState({
     email: '',
     password: '',
   });
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const { setToken } = useAuthContext();
 
@@ -18,10 +19,13 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
   }
 
   async function handleLogin() {
+    setLoggingIn(true);
     const { message, accessToken } = await loginPost(info);
 
     if (accessToken) setToken(accessToken);
     else alert(message);
+
+    setLoggingIn(false);
   }
 
   return (
@@ -59,7 +63,11 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
         </Text>
       </View>
       <View style={{ width: '50%' }}>
-        <Button title='Login' color={'purple'} onPress={handleLogin} />
+        {loggingIn ? (
+          <ActivityIndicator />
+        ) : (
+          <Button title='Login' color={'purple'} onPress={handleLogin} />
+        )}
       </View>
     </View>
   );

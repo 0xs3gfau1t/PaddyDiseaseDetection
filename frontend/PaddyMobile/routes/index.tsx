@@ -3,11 +3,14 @@ import AuthRoutes from './AuthRoutes';
 import NonAuthRoutes from './NonAuthRoutes';
 import { useAuthContext } from '@/contexts/auth/auth-provider';
 import LoadingScreen from '@/components/Loading';
+import { EventProvider } from 'react-native-outside-press';
 
 export default function Root() {
   const auth = useAuthContext();
   if (auth.isFetching) return <LoadingScreen />;
   return (
-    <NavigationContainer>{auth.token ? <AuthRoutes /> : <NonAuthRoutes />}</NavigationContainer>
+    <EventProvider>
+      <NavigationContainer>{auth.token ? <AuthRoutes /> : <NonAuthRoutes />}</NavigationContainer>
+    </EventProvider>
   );
 }

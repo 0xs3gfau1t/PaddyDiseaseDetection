@@ -11,3 +11,8 @@ export type AuthState = {
     email: string;
   } | null;
 };
+
+export type FetchType<T> = {
+  fetching: boolean;
+  data: null | T;
+};
