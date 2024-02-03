@@ -1,3 +1,4 @@
+import { TOKEN_HOLDER } from '@/constants/auth';
 import endpoints from '@/constants/endpoints';
 import * as SecureStore from 'expo-secure-store';
 
@@ -59,7 +60,7 @@ export async function loginPost(info: LoginProps) {
 
 export async function logout() {
   try {
-    await SecureStore.deleteItemAsync('accessToken');
+    await SecureStore.deleteItemAsync(TOKEN_HOLDER);
 
     return { good: true, message: 'Logged Out' };
   } catch (e) {

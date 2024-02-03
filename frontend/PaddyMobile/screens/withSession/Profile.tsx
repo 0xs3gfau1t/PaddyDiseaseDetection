@@ -1,8 +1,9 @@
-import { useAuthContext } from '@/contexts/auth/auth-provider';
+import { AuthContext } from '@/contexts/auth/auth-provider';
+import { useContext } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 
 export default function ProfileScreen() {
-  const { removeToken, userData } = useAuthContext();
+  const { removeToken, userData } = useContext(AuthContext);
 
   return (
     <View style={styles.container}>

@@ -1,15 +1,15 @@
 import { uploader } from '@/api/driver';
 import endpoints from '@/constants/endpoints';
-import { useAuthContext } from '@/contexts/auth/auth-provider';
+import { AuthContext } from '@/contexts/auth/auth-provider';
 import { MediaTypeOptions, launchCameraAsync, launchImageLibraryAsync } from 'expo-image-picker';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 
 export default function UploadNew({ onUpload }: { onUpload: () => void }) {
   const [isSending, setIsSending] = useState(false);
-  const { token } = useAuthContext();
+  const { token } = useContext(AuthContext);
 
   async function handleUpload(image?: string) {
     if (!image) return alert('Select an image first');

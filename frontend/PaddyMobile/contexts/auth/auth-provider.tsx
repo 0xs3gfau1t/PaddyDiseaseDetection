@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import { ReactNode, createContext, useEffect, useState } from 'react';
 import { deleteItemAsync, getItem, setItem } from 'expo-secure-store';
 import { AuthContextType } from '@/types/contexts/auth';
 import { AuthState } from '@/types/misc';
@@ -13,31 +13,27 @@ export const AuthContext = createContext({
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({} as AuthContextType);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     const token = getItem(TOKEN_HOLDER);
-    if (token) {
-      getLoggedInProfileInfo(token).then((info) => {
-        setAuthState({
-          userData: info,
-          isFetching: false,
-          token,
-        });
-      });
-    } else {
-      setAuthState({ isFetching: false, token, userData: null });
-    }
-  }, [accessToken]);
+    if (token) setToken(token);
+    else setAuthState({ isFetching: false, token, userData: null });
+  }, []);
 
   function setToken(token: string) {
     setItem(TOKEN_HOLDER, token);
-    setAccessToken(token);
+    getLoggedInProfileInfo(token).then((info) => {
+      setAuthState({
+        userData: info,
+        isFetching: false,
+        token,
+      });
+    });
   }
 
   async function removeToken() {
     await deleteItemAsync(TOKEN_HOLDER);
-    setAccessToken(null);
+    setAuthState({ isFetching: false, token: null, userData: null });
   }
   return (
     <AuthContext.Provider value={{ ...authState, setToken, removeToken }}>
@@ -45,9 +41,3 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
-export const useAuthContext = () => {
-  const context = useContext(AuthContext);
-
-  return context;
-};

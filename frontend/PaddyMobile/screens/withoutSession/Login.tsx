@@ -1,8 +1,8 @@
 import { loginPost } from '@/api/auth/signup';
 import pages from '@/constants/screens';
-import { useAuthContext } from '@/contexts/auth/auth-provider';
+import { AuthContext } from '@/contexts/auth/auth-provider';
 import { NavProps } from '@/types/misc';
-import { FC, useState } from 'react';
+import { FC, useContext, useState } from 'react';
 import { ActivityIndicator, Button, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 
 const LoginScreen: FC<NavProps> = ({ navigation }) => {
@@ -12,7 +12,7 @@ const LoginScreen: FC<NavProps> = ({ navigation }) => {
   });
   const [loggingIn, setLoggingIn] = useState(false);
 
-  const { setToken } = useAuthContext();
+  const { setToken } = useContext(AuthContext);
 
   function handleChange(name: string, value: string) {
     setInfo((i) => ({ ...i, [name]: value }));
