@@ -39,8 +39,8 @@ func (le *LocationExtractorFromFile) GetLocation() (Location, Location, error) {
 		return emptyLocation, emptyLocation, fmt.Errorf("Failed to extract metadata:%w", err)
 	}
 
-	longitudeStr := fileInfo.Fields["GPSLatitude"].(string)
-	latitudeStr := fileInfo.Fields["GPSLongitude"].(string)
+	longitudeStr, _ := fileInfo.Fields["GPSLatitude"].(string)
+	latitudeStr, _ := fileInfo.Fields["GPSLongitude"].(string)
 
 	regexPattern := `(\d+) deg (\d+)' ([\d.]+)" ([NSEW])`
 	re := regexp.MustCompile(regexPattern)
