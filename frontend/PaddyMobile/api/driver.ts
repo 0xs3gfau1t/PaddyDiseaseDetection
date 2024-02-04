@@ -16,7 +16,7 @@ export const fetcher = async ({
   );
   return fetch(`${uri}?${paramsJoined}`, {
     headers: {
-      Authorization: `Bearer=${token}`,
+      Authorization: `Bearer ${token}`,
     },
   })
     .then(async (r) => {
@@ -52,7 +52,7 @@ export const poster = async ({
     method: 'POST',
     body: data,
     headers: {
-      Authorization: `Bearer=${token}`,
+      Authorization: `Bearer ${token}`,
     },
   })
     .then(async (r) => {
@@ -91,7 +91,7 @@ export const uploader = async ({
     uploadType: FileSystemUploadType.MULTIPART,
     fieldName,
     headers: {
-      Authorization: `Bearer=${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
