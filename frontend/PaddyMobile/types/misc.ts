@@ -9,10 +9,17 @@ export type AuthState = {
     name: string;
     image: string;
     email: string;
+    verified: boolean;
+    coords: { latitude: number; longitude: number };
   } | null;
 };
 
 export type FetchType<T> = {
   fetching: boolean;
   data: null | T;
+};
+
+export type LocationType = {
+  latitude: number;
+  longitude: number;
 };
