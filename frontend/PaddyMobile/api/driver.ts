@@ -1,4 +1,3 @@
-import endpoints from '@/constants/endpoints';
 import { FileSystemUploadType, uploadAsync } from 'expo-file-system';
 
 export const fetcher = async ({
