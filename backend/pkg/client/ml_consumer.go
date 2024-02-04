@@ -61,7 +61,7 @@ func (m MlConsumer) UpdateStatus(ctx context.Context, msg *types.ProcessedMessag
 	if id, err := m.FindDiseaseIdFromName(msg.Disease, ctx); err != nil {
 		return err
 	} else {
-		return m.dbDiseaseIdentified.Update().Where(diseaseidentified.ID(msg.Id)).AddDisease(&ent.Disease{
+		return m.dbDiseaseIdentified.Update().Where(diseaseidentified.ID(msg.Id)).SetDisease(&ent.Disease{
 			ID: *id,
 		}).SetStatus(diseaseidentified.Status(msg.Status)).Exec(ctx)
 	}
