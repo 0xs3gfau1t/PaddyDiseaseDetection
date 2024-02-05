@@ -44,3 +44,17 @@ func EditProfileHandler(c echo.Context) error {
 
 	return client.Cli.User.UpdateUser(&sessionUser.Id, &input)
 }
+
+func ChangePassHandler(c echo.Context) error {
+	sessionUser, ok := c.Get("user").(types.AuthenticatedUserRequestValues)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, &NoUserReturn{
+			Error: "Couldn't find user info in request",
+		})
+	}
+
+	var input types.ChangePassRequest
+	c.Bind(&input)
+
+	return client.Cli.User.ChangePassword(&sessionUser.Id, &input)
+}

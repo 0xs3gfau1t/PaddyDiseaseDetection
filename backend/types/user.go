@@ -62,3 +62,8 @@ type UserProfileEditRequest struct {
 	Latitude  *float64 `form:"latitude"`
 	Longitude *float64 `form:"longitude"`
 }
+
+type ChangePassRequest struct {
+	OldPassword string `form:"oldPassword"`
+	NewPassword string `form:"newPassword"`
+}

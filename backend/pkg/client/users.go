@@ -22,6 +22,7 @@ type UserClient interface {
 	UserDetails(uuid.UUID) (*types.UserProfileData, error)
 	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
 	UpdateUser(*uuid.UUID, *types.UserProfileEditRequest) error
+	ChangePassword(*uuid.UUID, *types.ChangePassRequest) error
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
 	Login(*types.LoginUserValidInput) (string, error)
@@ -86,6 +87,27 @@ func (u usercli) CreateUser(validatedUser *types.CreateUserValidInput) (*ent.Use
 	toBeInsertedUser.SetPassword(string(hashed))
 
 	return toBeInsertedUser.Save(context.Background())
+}
+
+func (u usercli) ChangePassword(id *uuid.UUID, input *types.ChangePassRequest) error {
+	ctx := context.Background()
+
+	user, err := u.db.Get(ctx, *id)
+	if err != nil {
+		return err
+	}
+
+	err = u.CompareHashedPassword(input.OldPassword, user.Password)
+	if err != nil {
+		return err
+	}
+
+	hashed, err := u.HashPassword(input.NewPassword)
+	if err != nil || utf8.RuneCountInString(input.NewPassword) < 5 {
+		return errors.New("Couldn't hash password. Make sure password has length >= 5")
+	}
+
+	return u.db.UpdateOneID(*id).SetPassword(string(hashed)).Exec(ctx)
 }
 
 func (u usercli) Login(validatedUser *types.LoginUserValidInput) (string, error) {
