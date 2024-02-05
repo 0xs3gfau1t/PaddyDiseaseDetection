@@ -1,3 +1,4 @@
+import { logout } from '@/api/auth/signup';
 import LocationPicker from '@/components/profile/LocationPicker';
 import { VERIFICATION_EXPIRY_TIME } from '@/constants/misc';
 import { AuthContext } from '@/contexts/auth/auth-provider';
@@ -219,6 +220,7 @@ export default function ProfileScreen() {
                 onPress={() => setEditActiveFields((f) => ({ ...f, password: true }))}
               />
             )}
+            <Button title='Logout' onPress={removeToken} />
             <Button title='Delete Account' onPress={handleDelete} />
           </View>
         </View>

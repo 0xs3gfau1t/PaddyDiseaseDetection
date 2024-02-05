@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { fetcher } from '../driver';
 import { FetchType } from '@/types/misc';
 import endpoints from '@/constants/endpoints';
+import { AuthContext } from '@/contexts/auth/auth-provider';
 
 type ResponseType = {
-  diseases: { id: string; identified_as: string; imageLink: string }[];
-};
+  id: string;
+  name: string;
+  severity: number;
+  status: string;
+  image: string;
+}[];
 
 export default function useFetchDiseases({
   page = 0,
@@ -19,13 +24,16 @@ export default function useFetchDiseases({
     data: null,
   });
 
-  useEffect(() => {
+  const { token } = useContext(AuthContext);
+
+  const triggerFetch = () =>
     fetcher({
       params: [
         ['page', page.toString()],
         ['limit', limit.toString()],
       ],
-      uri: endpoints.disease,
+      uri: endpoints.diseases,
+      token: token as string,
     })
       .then((r) => {
         if (r.success)
@@ -35,13 +43,44 @@ export default function useFetchDiseases({
           });
         else throw new Error();
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error(e);
         setState({
           fetching: false,
           data: null,
         });
       });
+
+  useEffect(() => {
+    triggerFetch();
   }, [page, limit]);
 
-  return state;
+  return { state, triggerFetch };
+}
+
+export function useFetchUploaded({ id, item }: { id: string; item: any }) {
+  const [itemNew, setItemNew] = useState(item);
+
+  const { token } = useContext(AuthContext);
+
+  const triggerFetch = () =>
+    fetcher({
+      params: [['itemId', id]],
+      uri: endpoints.disease,
+      token: token as string,
+    })
+      .then((r) => {
+        if (r.success) setItemNew(r.data);
+        else throw new Error();
+      })
+      .catch((e) => {
+        console.error(e);
+        setItemNew(item);
+      });
+
+  useEffect(() => {
+    setInterval(triggerFetch, 10000);
+  }, []);
+
+  return itemNew;
 }

@@ -11,7 +11,8 @@ const endpoints = {
     root: `${API_ROOT}/profile`,
   },
   uploadImage: `${API_ROOT}/upload`,
-  disease: `${API_ROOT}/disease`,
+  diseases: `${API_ROOT}/uploads`,
+  disease: `${API_ROOT}/upload`,
 };
 
 export default endpoints;
