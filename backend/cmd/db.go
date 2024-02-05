@@ -79,7 +79,7 @@ var seedCmd = &cobra.Command{
 			return err
 		}
 
-		jsonFile, err := os.Open("seedData.json")
+		jsonFile, err := os.Open(os.Getenv("SEED_FILE"))
 		if err != nil {
 			log.Printf("Cannot open json file")
 			return err
