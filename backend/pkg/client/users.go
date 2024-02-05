@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"segFault/PaddyDiseaseDetection/ent"
@@ -20,6 +21,7 @@ import (
 type UserClient interface {
 	UserDetails(uuid.UUID) (*types.UserProfileData, error)
 	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
+	UpdateUser(*uuid.UUID, *types.UserProfileEditRequest) error
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
 	Login(*types.LoginUserValidInput) (string, error)
@@ -54,6 +56,20 @@ func (u usercli) UserDetails(id uuid.UUID) (*types.UserProfileData, error) {
 			Longitude: longitude.ToFloat(),
 		},
 	}, nil
+}
+
+func (u usercli) UpdateUser(id *uuid.UUID, input *types.UserProfileEditRequest) error {
+	qb := u.db.UpdateOneID(*id)
+
+	if input.Name != "" {
+		qb.SetName(input.Name)
+	}
+
+	if input.Longitude != nil && input.Latitude != nil {
+		qb.SetLocation(fmt.Sprintf("%f %f", *input.Latitude, *input.Longitude))
+	}
+
+	return qb.Exec(context.Background())
 }
 
 func (u usercli) CreateUser(validatedUser *types.CreateUserValidInput) (*ent.User, error) {

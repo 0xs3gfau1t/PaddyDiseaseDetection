@@ -56,3 +56,9 @@ type UserCoords struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 }
+
+type UserProfileEditRequest struct {
+	Name      string   `form:"name"`
+	Latitude  *float64 `form:"latitude"`
+	Longitude *float64 `form:"longitude"`
+}

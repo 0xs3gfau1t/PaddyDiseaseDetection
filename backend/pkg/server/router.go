@@ -26,5 +26,6 @@ func InitApiRoutes(e *echo.Echo) {
 	e.POST("/api/upload", handlers.UploadHandler, middlewareslocal.JwtMiddleware)
 	e.GET("/api/uploads", handlers.GetUploadsHandler, middlewareslocal.JwtMiddleware)
 	e.GET("/api/profile", handlers.GetProfileHandler, middlewareslocal.JwtMiddleware)
+	e.PATCH("/api/profile", handlers.EditProfileHandler, middlewareslocal.JwtMiddleware)
 	e.DELETE("/api/disease", handlers.RemoveIdentifiedDiseaseHandler, middlewareslocal.JwtMiddleware)
 }
