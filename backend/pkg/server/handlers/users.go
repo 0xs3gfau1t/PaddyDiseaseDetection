@@ -58,3 +58,13 @@ func ChangePassHandler(c echo.Context) error {
 
 	return client.Cli.User.ChangePassword(&sessionUser.Id, &input)
 }
+
+func DeleteProfileHandler(c echo.Context) error {
+	sessionUser, ok := c.Get("user").(types.AuthenticatedUserRequestValues)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, &NoUserReturn{
+			Error: "Couldn't find user info in request",
+		})
+	}
+	return client.Cli.User.DeleteUser(&sessionUser.Id)
+}

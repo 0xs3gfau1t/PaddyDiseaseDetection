@@ -23,6 +23,7 @@ type UserClient interface {
 	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
 	UpdateUser(*uuid.UUID, *types.UserProfileEditRequest) error
 	ChangePassword(*uuid.UUID, *types.ChangePassRequest) error
+	DeleteUser(id *uuid.UUID) error
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
 	Login(*types.LoginUserValidInput) (string, error)
@@ -108,6 +109,10 @@ func (u usercli) ChangePassword(id *uuid.UUID, input *types.ChangePassRequest) e
 	}
 
 	return u.db.UpdateOneID(*id).SetPassword(string(hashed)).Exec(ctx)
+}
+
+func (u usercli) DeleteUser(id *uuid.UUID) error {
+	return u.db.DeleteOneID(*id).Exec(context.Background())
 }
 
 func (u usercli) Login(validatedUser *types.LoginUserValidInput) (string, error) {
