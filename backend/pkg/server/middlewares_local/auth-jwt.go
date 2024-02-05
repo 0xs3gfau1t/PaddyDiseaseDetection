@@ -1,7 +1,6 @@
 package middlewareslocal
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,8 +13,7 @@ import (
 
 func JwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		tokenString := strings.Split(c.Request().Header.Get("Authorization"), "=")[1]
-		fmt.Println("Header: ", c.Request().Header)
+		tokenString := strings.Split(c.Request().Header.Get("Authorization"), " ")[1]
 		if tokenString == "" {
 			return echo.NewHTTPError(http.StatusForbidden, "No authorization token found")
 		}

@@ -28,6 +28,7 @@ type IdentifiedDiseasesClient interface {
 	UploadImages(*types.ImageUploadType, *uuid.UUID, *http.Request) error
 	RollbackImageUploads([]string) error
 	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
+	GetUploads(*uuid.UUID) ([]*ent.DiseaseIdentified, error)
 }
 
 type IdentifiedDiseases struct {
@@ -245,4 +246,12 @@ func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user
 		return err
 	}
 	return nil
+}
+
+func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*ent.DiseaseIdentified, error) {
+	diseases, err := idiseaseCli.dbDiseaseIdentified.Query().WithDisease().WithImage().Where(diseaseidentified.HasUploadedByWith(user.ID(*user_id))).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return diseases, nil
 }
