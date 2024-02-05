@@ -3,9 +3,11 @@ package client
 import (
 	"context"
 	"errors"
+	"log"
 	"os"
 	"segFault/PaddyDiseaseDetection/ent"
 	"segFault/PaddyDiseaseDetection/ent/user"
+	"segFault/PaddyDiseaseDetection/pkg/location"
 	"segFault/PaddyDiseaseDetection/types"
 	"time"
 	"unicode/utf8"
@@ -16,7 +18,7 @@ import (
 )
 
 type UserClient interface {
-	UserDetails(uuid.UUID) (*ent.User, error)
+	UserDetails(uuid.UUID) (*types.UserProfileData, error)
 	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
@@ -27,8 +29,31 @@ type usercli struct {
 	db *ent.UserClient
 }
 
-func (u usercli) UserDetails(id uuid.UUID) (*ent.User, error) {
-	return u.db.Get(context.Background(), id)
+func (u usercli) UserDetails(id uuid.UUID) (*types.UserProfileData, error) {
+	user, err := u.db.Get(context.Background(), id)
+	if err != nil {
+		return nil, err
+	}
+
+	userLE := location.LocationExtractorFromUser{
+		Userid: user.ID,
+		Db:     Cli.db,
+	}
+	latitude, longitude, err := userLE.GetLocation()
+	if err != nil {
+		log.Printf("Couldn't get user location: %s", err)
+	}
+
+	return &types.UserProfileData{
+		Name:     user.Name,
+		Image:    "", // TODO: add user image to db
+		Email:    user.Email,
+		Verified: user.Password != "",
+		Location: types.UserCoords{
+			Latitude:  latitude.ToFloat(),
+			Longitude: longitude.ToFloat(),
+		},
+	}, nil
 }
 
 func (u usercli) CreateUser(validatedUser *types.CreateUserValidInput) (*ent.User, error) {
