@@ -3,7 +3,8 @@ import { deleteItemAsync, getItem, setItem } from 'expo-secure-store';
 import { AuthContextType } from '@/types/contexts/auth';
 import { AuthState } from '@/types/misc';
 import { TOKEN_HOLDER } from '@/constants/auth';
-import { getLoggedInProfileInfo } from '@/api/profile/getProfile';
+import { fetcher } from '@/api/driver';
+import endpoints from '@/constants/endpoints';
 
 export const AuthContext = createContext({
   isFetching: true,
@@ -22,9 +23,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   function setToken(token: string) {
     setItem(TOKEN_HOLDER, token);
-    getLoggedInProfileInfo(token).then((info) => {
+    fetcher({ uri: endpoints.profile.root, token }).then((r) => {
       setAuthState({
-        userData: info,
+        userData: r.data,
         isFetching: false,
         token,
       });

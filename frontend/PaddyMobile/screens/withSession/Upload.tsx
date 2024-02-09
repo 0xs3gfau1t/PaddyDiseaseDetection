@@ -39,7 +39,10 @@ export default function UploadScreen() {
       );
     else
       return (
-        <View style={{ gap: 5, flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{ gap: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text>No History</Text>
           <AntDesign name='question' size={40} />
         </View>
       );

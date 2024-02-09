@@ -1,4 +1,3 @@
-import { logout } from '@/api/auth/signup';
 import LocationPicker from '@/components/profile/LocationPicker';
 import { VERIFICATION_EXPIRY_TIME } from '@/constants/misc';
 import { AuthContext } from '@/contexts/auth/auth-provider';

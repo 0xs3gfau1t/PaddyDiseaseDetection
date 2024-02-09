@@ -5,14 +5,13 @@ export const fetcher = async ({
   uri,
   token,
 }: {
-  params: [string, string][];
+  params?: [string, string][];
   uri: string;
   token?: string;
 }) => {
-  const paramsJoined = params.reduce(
-    (prev, current) => prev + '&' + current[0] + '=' + current[1],
-    ''
-  );
+  const paramsJoined = params
+    ? params.reduce((prev, current) => prev + '&' + current[0] + '=' + current[1], '')
+    : '';
   return fetch(`${uri}?${paramsJoined}`, {
     headers: {
       Authorization: `Bearer ${token}`,

@@ -7,7 +7,7 @@ export type AuthState = {
   token: string | null;
   userData: {
     name: string;
-    image: string;
+    image: string | undefined;
     email: string;
     verified: boolean;
     coords: { latitude: number; longitude: number };
