@@ -3,9 +3,12 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"os"
 	"segFault/PaddyDiseaseDetection/ent"
 	"segFault/PaddyDiseaseDetection/ent/user"
+	"segFault/PaddyDiseaseDetection/pkg/location"
 	"segFault/PaddyDiseaseDetection/types"
 	"time"
 	"unicode/utf8"
@@ -16,8 +19,11 @@ import (
 )
 
 type UserClient interface {
-	UserDetails(uuid.UUID) (*ent.User, error)
+	UserDetails(uuid.UUID) (*types.UserProfileData, error)
 	CreateUser(*types.CreateUserValidInput) (*ent.User, error)
+	UpdateUser(*uuid.UUID, *types.UserProfileEditRequest) error
+	ChangePassword(*uuid.UUID, *types.ChangePassRequest) error
+	DeleteUser(id *uuid.UUID) error
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
 	Login(*types.LoginUserValidInput) (string, error)
@@ -27,8 +33,45 @@ type usercli struct {
 	db *ent.UserClient
 }
 
-func (u usercli) UserDetails(id uuid.UUID) (*ent.User, error) {
-	return u.db.Get(context.Background(), id)
+func (u usercli) UserDetails(id uuid.UUID) (*types.UserProfileData, error) {
+	user, err := u.db.Get(context.Background(), id)
+	if err != nil {
+		return nil, err
+	}
+
+	userLE := location.LocationExtractorFromUser{
+		Userid: user.ID,
+		Db:     Cli.db,
+	}
+	latitude, longitude, err := userLE.GetLocation()
+	if err != nil {
+		log.Printf("Couldn't get user location: %s", err)
+	}
+
+	return &types.UserProfileData{
+		Name:     user.Name,
+		Image:    "", // TODO: add user image to db
+		Email:    user.Email,
+		Verified: user.Password != "",
+		Location: types.UserCoords{
+			Latitude:  latitude.ToFloat(),
+			Longitude: longitude.ToFloat(),
+		},
+	}, nil
+}
+
+func (u usercli) UpdateUser(id *uuid.UUID, input *types.UserProfileEditRequest) error {
+	qb := u.db.UpdateOneID(*id)
+
+	if input.Name != "" {
+		qb.SetName(input.Name)
+	}
+
+	if input.Longitude != nil && input.Latitude != nil {
+		qb.SetLocation(fmt.Sprintf("%f %f", *input.Latitude, *input.Longitude))
+	}
+
+	return qb.Exec(context.Background())
 }
 
 func (u usercli) CreateUser(validatedUser *types.CreateUserValidInput) (*ent.User, error) {
@@ -45,6 +88,31 @@ func (u usercli) CreateUser(validatedUser *types.CreateUserValidInput) (*ent.Use
 	toBeInsertedUser.SetPassword(string(hashed))
 
 	return toBeInsertedUser.Save(context.Background())
+}
+
+func (u usercli) ChangePassword(id *uuid.UUID, input *types.ChangePassRequest) error {
+	ctx := context.Background()
+
+	user, err := u.db.Get(ctx, *id)
+	if err != nil {
+		return err
+	}
+
+	err = u.CompareHashedPassword(input.OldPassword, user.Password)
+	if err != nil {
+		return err
+	}
+
+	hashed, err := u.HashPassword(input.NewPassword)
+	if err != nil || utf8.RuneCountInString(input.NewPassword) < 5 {
+		return errors.New("Couldn't hash password. Make sure password has length >= 5")
+	}
+
+	return u.db.UpdateOneID(*id).SetPassword(string(hashed)).Exec(ctx)
+}
+
+func (u usercli) DeleteUser(id *uuid.UUID) error {
+	return u.db.DeleteOneID(*id).Exec(context.Background())
 }
 
 func (u usercli) Login(validatedUser *types.LoginUserValidInput) (string, error) {

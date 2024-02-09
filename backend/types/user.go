@@ -44,3 +44,26 @@ type ProcessedMessage struct {
 	Disease string    `json:"disease"`
 	Status  string    `json:"status"`
 }
+
+type UserProfileData struct {
+	Name     string     `json:"name"`
+	Image    string     `json:"image"`
+	Email    string     `json:"email"`
+	Verified bool       `json:"verified"`
+	Location UserCoords `json:"coords"`
+}
+type UserCoords struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
+type UserProfileEditRequest struct {
+	Name      string   `form:"name"`
+	Latitude  *float64 `form:"latitude"`
+	Longitude *float64 `form:"longitude"`
+}
+
+type ChangePassRequest struct {
+	OldPassword string `form:"oldPassword"`
+	NewPassword string `form:"newPassword"`
+}
