@@ -11,6 +11,7 @@ export type AuthState = {
     email: string;
     verified: boolean;
     coords: { latitude: number; longitude: number };
+    location: string;
   } | null;
 };
 

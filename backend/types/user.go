@@ -50,7 +50,8 @@ type UserProfileData struct {
 	Image    string     `json:"image"`
 	Email    string     `json:"email"`
 	Verified bool       `json:"verified"`
-	Location UserCoords `json:"coords"`
+	Location string     `json:"location"`
+	Coords   UserCoords `json:"coords"`
 }
 type UserCoords struct {
 	Latitude  float64 `json:"latitude"`
@@ -61,6 +62,7 @@ type UserProfileEditRequest struct {
 	Name      string   `form:"name"`
 	Latitude  *float64 `form:"latitude"`
 	Longitude *float64 `form:"longitude"`
+	Location  string   `form:"location"`
 }
 
 type ChangePassRequest struct {

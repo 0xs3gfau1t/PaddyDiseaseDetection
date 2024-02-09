@@ -1,7 +1,9 @@
+import { changePassword, deleteAccount, editProfile } from '@/api/profile';
 import LocationPicker from '@/components/profile/LocationPicker';
 import { VERIFICATION_EXPIRY_TIME } from '@/constants/misc';
 import { AuthContext } from '@/contexts/auth/auth-provider';
 import { LocationType } from '@/types/misc';
+import { reverseGeocodeAsync } from 'expo-location';
 import { useContext, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -30,31 +32,64 @@ const verificationStat = {
 };
 
 export default function ProfileScreen() {
-  const { removeToken, userData: userDataContext } = useContext(AuthContext);
+  const { removeToken, userData: userDataContext, token } = useContext(AuthContext);
   const [editActiveFields, setEditActiveFields] = useState({
-    name: false,
-    image: false,
-    location: false,
-    verified: false,
-    password: false,
+    name: 0,
+    image: 0,
+    location: 0,
+    verified: 0,
+    password: 0,
   });
-  const [userData, setUserData] = useState(userDataContext);
+  const [userData, setUserData] = useState(
+    userDataContext || {
+      name: 'N/A',
+      image: undefined,
+      verified: false,
+      email: 'N/A',
+      coords: { latitude: 0, longitude: 0 },
+      location: 'N/A',
+    }
+  );
   const [profileImageSize, _] = useState(Dimensions.get('screen').width * 0.25);
   const [verificationText, setVerificationText] = useState(verificationStat.NOT_SENT);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [reNewPassword, setReNewPassword] = useState('');
 
-  function handleLocationPicked({ latitude, longitude }: LocationType) {
-    console.log('Setting your new location to ', latitude, longitude);
-    setEditActiveFields((f) => ({ ...f, location: false }));
+  async function handleLocationPicked({ latitude, longitude }: LocationType) {
+    const location = await reverseGeocodeAsync({ latitude, longitude });
+    setEditActiveFields((f) => ({ ...f, location: 1 }));
+    if (!token) return;
+    const { success } = await editProfile({
+      coords: { latitude, longitude },
+      location: location[0].city || location[0].subregion || location[0].region || undefined,
+      token,
+    });
+    if (success) alert('Location updated successfully');
+    else alert('Failed updating location');
+    setEditActiveFields((f) => ({ ...f, location: 0 }));
+  }
+
+  async function handleNameChangeSubmit() {
+    setEditActiveFields((f) => ({ ...f, name: 1 }));
+    if (!token || !userData?.name) return;
+    await editProfile({ name: userData.name, token });
+    setEditActiveFields((f) => ({ ...f, name: 0 }));
   }
 
   function handleDelete() {
+    if (!token) return;
     Alert.alert('Confirm delete account?', 'Deleting your account is permanent and irreversible', [
       {
         text: 'Confirm',
-        onPress: () => alert('Account Deleted'),
+        onPress: () => {
+          deleteAccount({ token }).then((r) => {
+            if (r.success) {
+              alert('Account deleted');
+              removeToken();
+            } else alert("Couldn't delete account");
+          });
+        },
       },
       { text: 'Cancel', onPress: () => {} },
     ]);
@@ -77,9 +112,14 @@ export default function ProfileScreen() {
       );
   }, [userData, defaultProfilePic, profileImageSize]);
 
-  function handlePasswordChange() {
+  async function handlePasswordChange() {
+    setEditActiveFields((f) => ({ ...f, password: 1 }));
+    if (!token) return;
     if (newPassword !== reNewPassword) alert("Passwords don't match");
-    console.log('Invoking change password endpoint');
+    const { success } = await changePassword({ oldPassword, newPassword, token });
+    if (success) alert('Updated new password');
+    else alert("Couldn't change password");
+    setEditActiveFields((f) => ({ ...f, password: 0 }));
   }
 
   async function handleVerificationRequest() {
@@ -107,32 +147,42 @@ export default function ProfileScreen() {
             ) : (
               <Octicons name='unverified' size={20} style={{ color: 'orange' }} />
             )}
-            {editActiveFields.name ? (
+            {editActiveFields.name < 0 ? (
               <OutsidePressHandler
-                onOutsidePress={() => setEditActiveFields((f) => ({ ...f, name: false }))}
+                onOutsidePress={() => setEditActiveFields((f) => ({ ...f, name: 0 }))}
+                style={{ flexDirection: 'row', gap: 10 }}
               >
-                <TextInput value={userData?.name} onChangeText={(e) => {}} autoFocus />
+                <TextInput
+                  value={userData?.name}
+                  onChangeText={(e) => setUserData((d) => ({ ...d, name: e }))}
+                  autoFocus
+                />
+                <Button title='Save' onPress={handleNameChangeSubmit} />
               </OutsidePressHandler>
             ) : (
-              <Text style={styles.name}>{userData?.name}</Text>
+              <>
+                <Text style={styles.name}>{userData?.name}</Text>
+                <Pressable onPress={() => setEditActiveFields((f) => ({ ...f, name: -1 }))}>
+                  <AntDesign name='edit' size={20} />
+                </Pressable>
+              </>
             )}
-            {!editActiveFields.name && <AntDesign name='edit' size={20} />}
           </View>
           <View style={styles.bgContainer} />
         </Card>
 
         <View>
-          {editActiveFields.location ? (
+          {editActiveFields.location < 0 ? (
             <LocationPicker
               onPicked={handleLocationPicked}
-              onCancel={() => setEditActiveFields((f) => ({ ...f, location: false }))}
+              onCancel={() => setEditActiveFields((f) => ({ ...f, location: 0 }))}
               currentCoords={userData ? userData.coords : undefined}
             />
           ) : (
             <EditableField
               label='Location:'
-              value='Pokhara'
-              onEditActive={() => setEditActiveFields((f) => ({ ...f, location: true }))}
+              value={userData.location}
+              onEditActive={() => setEditActiveFields((f) => ({ ...f, location: -1 }))}
             />
           )}
 
@@ -171,13 +221,13 @@ export default function ProfileScreen() {
           <View
             style={{
               alignSelf: 'center',
-              alignItems: editActiveFields.password ? 'center' : 'stretch',
+              alignItems: editActiveFields.password < 0 ? 'center' : 'stretch',
               width: editActiveFields.password ? '100%' : '50%',
               gap: 10,
               justifyContent: 'center',
             }}
           >
-            {editActiveFields.password && (
+            {editActiveFields.password < 0 && (
               <Card
                 style={{
                   width: '100%',
@@ -187,15 +237,27 @@ export default function ProfileScreen() {
               >
                 <View style={styles.passwordInputContainer}>
                   <Text style={styles.label}>Old Password</Text>
-                  <TextInput onChangeText={(e) => setOldPassword(e)} style={styles.input} />
+                  <TextInput
+                    onChangeText={(e) => setOldPassword(e)}
+                    style={styles.input}
+                    secureTextEntry
+                  />
                 </View>
                 <View style={styles.passwordInputContainer}>
                   <Text style={styles.label}>New Password</Text>
-                  <TextInput onChangeText={(e) => setNewPassword(e)} style={styles.input} />
+                  <TextInput
+                    onChangeText={(e) => setNewPassword(e)}
+                    style={styles.input}
+                    secureTextEntry
+                  />
                 </View>
                 <View style={styles.passwordInputContainer}>
                   <Text style={styles.label}>Repeat New Password</Text>
-                  <TextInput onChangeText={(e) => setReNewPassword(e)} style={styles.input} />
+                  <TextInput
+                    onChangeText={(e) => setReNewPassword(e)}
+                    style={styles.input}
+                    secureTextEntry
+                  />
                 </View>
                 <View
                   style={{
@@ -208,7 +270,7 @@ export default function ProfileScreen() {
                   <Button title='Save' onPress={handlePasswordChange} />
                   <Button
                     title='Cancel'
-                    onPress={() => setEditActiveFields((f) => ({ ...f, password: false }))}
+                    onPress={() => setEditActiveFields((f) => ({ ...f, password: 0 }))}
                   />
                 </View>
               </Card>
@@ -216,7 +278,7 @@ export default function ProfileScreen() {
             {!editActiveFields.password && (
               <Button
                 title='Change Password'
-                onPress={() => setEditActiveFields((f) => ({ ...f, password: true }))}
+                onPress={() => setEditActiveFields((f) => ({ ...f, password: -1 }))}
               />
             )}
             <Button title='Logout' onPress={removeToken} />
@@ -297,6 +359,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get('screen').width * 0.5,
     borderRadius: 10,
     borderColor: '#000',
+    textAlign: 'center',
   },
   passwordInputContainer: {
     flexDirection: 'row',

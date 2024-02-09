@@ -53,7 +53,8 @@ func (u usercli) UserDetails(id uuid.UUID) (*types.UserProfileData, error) {
 		Image:    "", // TODO: add user image to db
 		Email:    user.Email,
 		Verified: user.Password != "",
-		Location: types.UserCoords{
+		Location: user.Location,
+		Coords: types.UserCoords{
 			Latitude:  latitude.ToFloat(),
 			Longitude: longitude.ToFloat(),
 		},
@@ -68,7 +69,8 @@ func (u usercli) UpdateUser(id *uuid.UUID, input *types.UserProfileEditRequest) 
 	}
 
 	if input.Longitude != nil && input.Latitude != nil {
-		qb.SetLocation(fmt.Sprintf("%f %f", *input.Latitude, *input.Longitude))
+		qb.SetLocation(*&input.Location)
+		qb.SetCoord(fmt.Sprintf("%f %f", *input.Latitude, *input.Longitude))
 	}
 
 	return qb.Exec(context.Background())
