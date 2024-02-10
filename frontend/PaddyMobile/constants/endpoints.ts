@@ -1,4 +1,4 @@
-const API_ROOT = 'http://192.168.10.104:3000/api';
+const API_ROOT = 'http://192.168.10.107:3000/api';
 
 const endpoints = {
   auth: {
@@ -9,9 +9,11 @@ const endpoints = {
   },
   profile: {
     root: `${API_ROOT}/profile`,
+    changePassword: `${API_ROOT}/profile/change_password`,
   },
   uploadImage: `${API_ROOT}/upload`,
-  disease: `${API_ROOT}/disease`,
+  diseases: `${API_ROOT}/uploads`,
+  disease: `${API_ROOT}/upload`,
 };
 
 export default endpoints;

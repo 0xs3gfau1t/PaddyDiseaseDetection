@@ -6,12 +6,15 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build": "eas build -p android",
+    "build:android": "eas build -p android --profile preview:android"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
+    "eas-cli": "^7.1.2",
     "expo": "~50.0.4",
     "expo-file-system": "^16.0.5",
     "expo-image-picker": "^14.7.1",

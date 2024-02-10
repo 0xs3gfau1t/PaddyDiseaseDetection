@@ -24,7 +24,7 @@ func JwtMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		claim, ok := token.Claims.(*types.JwtType)
 		if err != nil || !token.Valid || !ok {
 			log.Println(err, ok)
-			return c.JSON(http.StatusOK, map[string]string{
+			return c.JSON(http.StatusForbidden, map[string]string{
 				"error": "Access denied. Invalid token",
 			})
 		}

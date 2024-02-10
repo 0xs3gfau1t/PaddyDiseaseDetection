@@ -9,6 +9,7 @@ import (
 	"segFault/PaddyDiseaseDetection/ent/disease"
 	"segFault/PaddyDiseaseDetection/ent/diseaseidentified"
 	"segFault/PaddyDiseaseDetection/types"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rabbitmq/amqp091-go"
@@ -47,8 +48,9 @@ func (m MlConsumer) Run() {
 					msg.Ack(false)
 				} else {
 					//TODO: Solve infinite loop problem
+					msg.Ack(false) // Temporary workaround
+					//msg.Nack(false, true)
 					log.Println("Error updating message: ", err)
-					msg.Nack(false, true)
 				}
 			}(ctx, semapho.Release, msg)
 		}
@@ -58,13 +60,22 @@ func (m MlConsumer) Run() {
 func (m MlConsumer) UpdateStatus(ctx context.Context, msg *types.ProcessedMessage) error {
 	// TODO: Avaid setting status from processed to processing
 	// THis could happen due to network level race conditions
-	if id, err := m.FindDiseaseIdFromName(msg.Disease, ctx); err != nil {
+	if id, err := m.FindDiseaseIdFromName(m.PrepareName(msg.Disease), ctx); err != nil {
 		return err
 	} else {
 		return m.dbDiseaseIdentified.Update().Where(diseaseidentified.ID(msg.Id)).SetDisease(&ent.Disease{
 			ID: *id,
 		}).SetStatus(diseaseidentified.Status(msg.Status)).Exec(ctx)
 	}
+}
+
+func (m MlConsumer) PrepareName(name string) string {
+	finalString := ""
+	for _, partName := range strings.Split(name, "_") {
+		capitalized := strings.ToUpper(string(partName[0])) + partName[1:]
+		finalString += capitalized + " "
+	}
+	return strings.Trim(finalString, " ")
 }
 
 func (m MlConsumer) FindDiseaseIdFromName(name string, ctx context.Context) (*uuid.UUID, error) {

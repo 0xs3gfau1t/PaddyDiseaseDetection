@@ -24,6 +24,7 @@ func InitApiRoutes(e *echo.Echo) {
 	e.POST("/api/auth/login", handlers.LoginHandler)
 	e.POST("/api/auth/logout", handlers.LogoutHander)
 	e.POST("/api/upload", handlers.UploadHandler, middlewareslocal.JwtMiddleware)
+	e.GET("/api/upload", handlers.GetUploadHandler, middlewareslocal.JwtMiddleware)
 	e.GET("/api/uploads", handlers.GetUploadsHandler, middlewareslocal.JwtMiddleware)
 	e.GET("/api/profile", handlers.GetProfileHandler, middlewareslocal.JwtMiddleware)
 	e.PATCH("/api/profile", handlers.EditProfileHandler, middlewareslocal.JwtMiddleware)

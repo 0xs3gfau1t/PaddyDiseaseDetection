@@ -13,6 +13,7 @@ export default function UploadNew({ onUpload }: { onUpload: () => void }) {
 
   async function handleUpload(image?: string) {
     if (!image) return alert('Select an image first');
+    if (!token) return alert('Not authorized.');
     setIsSending(true);
 
     try {
@@ -20,7 +21,7 @@ export default function UploadNew({ onUpload }: { onUpload: () => void }) {
         fileUri: image,
         fieldName: 'images',
         uri: endpoints.uploadImage,
-        token: token as string, // Since this route is not possible without token
+        token,
       });
       if (resp.status !== 200) throw resp;
       try {

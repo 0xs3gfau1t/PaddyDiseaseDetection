@@ -28,7 +28,8 @@ type IdentifiedDiseasesClient interface {
 	UploadImages(*types.ImageUploadType, *uuid.UUID, *http.Request) error
 	RollbackImageUploads([]string) error
 	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
-	GetUploads(*uuid.UUID) ([]*ent.DiseaseIdentified, error)
+	GetUploads(*uuid.UUID) ([]*types.UploadedEntity, error)
+	GetUpload(*uuid.UUID, *uuid.UUID) (*types.UploadedEntity, error)
 }
 
 type IdentifiedDiseases struct {
@@ -248,10 +249,63 @@ func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user
 	return nil
 }
 
-func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*ent.DiseaseIdentified, error) {
+func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.UploadedEntity, error) {
 	diseases, err := idiseaseCli.dbDiseaseIdentified.Query().WithDisease().WithImage().Where(diseaseidentified.HasUploadedByWith(user.ID(*user_id))).All(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	return diseases, nil
+
+	var cleanedUploads []*types.UploadedEntity
+
+	for _, uploadItem := range diseases {
+
+		imageLink := ""
+		if image := uploadItem.Edges.Image; image != nil {
+			if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
+				imageLink = imgLink
+			}
+		}
+
+		diseaseName := "N/A"
+		if disease := uploadItem.Edges.Disease; disease != nil {
+			diseaseName = disease.Name
+		}
+
+		cleanedUploads = append(cleanedUploads, &types.UploadedEntity{
+			Id:       uploadItem.ID.String(),
+			Name:     diseaseName,
+			Status:   uploadItem.Status.String(),
+			Severity: uploadItem.Severity,
+			Images:   imageLink,
+		})
+	}
+	return cleanedUploads, nil
+}
+
+func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uuid.UUID) (*types.UploadedEntity, error) {
+	diseases, err := idiseaseCli.dbDiseaseIdentified.Query().WithDisease().WithImage().Where(diseaseidentified.HasUploadedByWith(user.ID(*user_id))).Where(diseaseidentified.ID(*uploadId)).First(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	imageLink := ""
+	if image := diseases.Edges.Image; image != nil {
+		if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
+			imageLink = imgLink
+		}
+	}
+
+	diseaseName := "N/A"
+	if disease := diseases.Edges.Disease; disease != nil {
+		diseaseName = disease.Name
+	}
+
+	cleanedUploads := types.UploadedEntity{
+		Id:       diseases.ID.String(),
+		Name:     diseaseName,
+		Status:   diseases.Status.String(),
+		Severity: diseases.Severity,
+		Images:   imageLink,
+	}
+	return &cleanedUploads, nil
 }

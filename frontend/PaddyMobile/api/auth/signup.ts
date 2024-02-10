@@ -28,10 +28,10 @@ export async function signUpPost(info: SignUpProps) {
 
     if (!res.ok) throw await res.json();
 
-    return { good: true, message: 'Signed up successfully' };
+    return { success: true, message: 'Signed up successfully' };
   } catch (e) {
     console.error(e);
-    return { good: false, message: "Couldn't signup" };
+    return { success: false, message: "Couldn't signup" };
   }
 }
 
@@ -51,10 +51,10 @@ export async function loginPost(info: LoginProps) {
 
     const { accessToken }: { accessToken: string } = await res.json();
 
-    return { good: true, message: 'Logged in successfully', accessToken };
+    return { success: true, message: 'Logged in successfully', accessToken };
   } catch (e) {
     console.error(e);
-    return { good: false, message: "Couldn't login" };
+    return { success: false, message: "Couldn't login" };
   }
 }
 

@@ -1,5 +1,6 @@
 import useFetchDiseases from '@/api/disease/fetch-diseases';
 import UploadNew from '@/components/UploadNew';
+import UploadItem from '@/components/upload/UploadItem';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,11 +17,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 export default function UploadScreen() {
   const [page, _] = useState(0);
   const [limit, __] = useState(5);
-  const { fetching, data } = useFetchDiseases({ page, limit });
-
-  function triggerRefresh() {
-    console.log('List triggered');
-  }
+  const {
+    state: { fetching, data },
+    triggerFetch,
+  } = useFetchDiseases({ page, limit });
 
   const renderStats = useMemo(() => {
     if (fetching)
@@ -39,9 +39,11 @@ export default function UploadScreen() {
       );
     else
       return (
-        <View style={{ gap: 5, flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{ gap: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text>No History</Text>
           <AntDesign name='question' size={40} />
-          <Text>No history found</Text>
         </View>
       );
   }, [fetching, data]);
@@ -59,16 +61,10 @@ export default function UploadScreen() {
           Upload History
         </Text>
         <Card style={styles.history}>
-          {data
-            ? data.diseases.map((item) => (
-                <View style={styles.historyItem}>
-                  <Text key={item.id}>Identified as: {item.identified_as}</Text>
-                </View>
-              ))
-            : renderStats}
+          {data ? data.map((item) => <UploadItem item={item} key={item.id} />) : renderStats}
         </Card>
       </ScrollView>
-      <UploadNew onUpload={triggerRefresh} />
+      <UploadNew onUpload={triggerFetch} />
 
       <Image source={require('@/assets/icons/tea.png')} style={styles.imgBg} />
     </View>
@@ -89,11 +85,7 @@ const styles = StyleSheet.create({
     opacity: 0.1,
   },
   history: {
-    width: '95%',
-    gap: 2,
+    width: '100%',
     alignSelf: 'center',
-  },
-  historyItem: {
-    padding: 5,
   },
 });
