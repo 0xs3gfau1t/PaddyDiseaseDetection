@@ -56,7 +56,7 @@ resource "azurerm_network_interface" "webserver_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Static"
-    private_ip_address            = "10.0.2.100"
+    private_ip_address            = var.webserver_private_ip
     public_ip_address_id          = azurerm_public_ip.webserver_public_ip.id
   }
 }
@@ -82,10 +82,10 @@ resource "azurerm_linux_virtual_machine" "webserver" {
     storage_account_type = "Standard_LRS"
   }
   source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
-    sku       = "11-backports-gen2"
-    offer     = "debian-11"
-    publisher = "Debian"
   }
 }
 
@@ -103,7 +103,6 @@ resource "azurerm_postgresql_server" "backend_postgres_server" {
   ssl_enforcement_enabled          = false
   ssl_minimal_tls_version_enforced = "TLSEnforcementDisabled"
   version                          = 9.5
-
 }
 
 resource "azurerm_postgresql_database" "backend_db" {
@@ -122,7 +121,7 @@ resource "azurerm_network_interface" "ml_machine_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Static"
-    private_ip_address            = "10.0.2.200"
+    private_ip_address            = var.ml_server_private_ip
   }
 }
 
@@ -140,6 +139,7 @@ resource "azurerm_linux_virtual_machine" "ml_server" {
     username   = var.ssh_username
     public_key = var.ssh_public_key
   }
+
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
@@ -191,5 +191,46 @@ resource "azurerm_network_security_group" "allowed_ports" {
     destination_port_range     = "22"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface" "rabbitmq_nic" {
+  name                = "rabbitmq-nic"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = var.mq_private_ip
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "rabbitmq_server" {
+  name                = "rabbitmq-server"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  size = "Standard_B1s"
+
+  admin_username = var.ssh_username
+
+  network_interface_ids = [azurerm_network_interface.rabbitmq_nic.id]
+
+  custom_data = base64encode(file("scripts/rabbitmq.sh"))
+
+  admin_ssh_key {
+    username   = var.ssh_username
+    public_key = var.ssh_public_key
+  }
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+  source_image_reference {
+    version   = "latest"
+    sku       = "11-backports-gen2"
+    offer     = "debian-11"
+    publisher = "Debian"
   }
 }

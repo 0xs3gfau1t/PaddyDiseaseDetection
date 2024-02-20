@@ -13,3 +13,7 @@ output "ml_machine_private_ip" {
 output "username" {
   value = var.ssh_username
 }
+
+output "rabbitmq_private_ip" {
+  value = azurerm_linux_virtual_machine.rabbitmq_server.private_ip_address
+}
