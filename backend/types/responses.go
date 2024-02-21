@@ -6,9 +6,9 @@ package types
 //
 
 type UploadedEntity struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	Images   string `json:"images"`
-	Severity int    `json:"severity"`
-	Status   string `json:"status"`
+	Id       string   `json:"id"`
+	Name     string   `json:"name"`
+	Images   []string `json:"images"`
+	Severity int      `json:"severity"`
+	Status   string   `json:"status"`
 }

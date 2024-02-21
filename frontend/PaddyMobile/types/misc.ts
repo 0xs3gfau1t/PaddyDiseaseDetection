@@ -24,3 +24,11 @@ export type LocationType = {
   latitude: number;
   longitude: number;
 };
+
+export type UploadDetailType = {
+  images: string[];
+  name: string;
+  severity: string;
+  staus: string;
+  id: string;
+};

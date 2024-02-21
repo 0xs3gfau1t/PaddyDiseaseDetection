@@ -259,10 +259,10 @@ func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.U
 
 	for _, uploadItem := range diseases {
 
-		imageLink := ""
+		var imageLink []string
 		if image := uploadItem.Edges.Image; image != nil {
 			if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
-				imageLink = imgLink
+				imageLink = append(imageLink, imgLink)
 			}
 		}
 
@@ -288,10 +288,10 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		return nil, err
 	}
 
-	imageLink := ""
+	var imageLink []string
 	if image := diseases.Edges.Image; image != nil {
 		if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
-			imageLink = imgLink
+			imageLink = append(imageLink, imgLink)
 		}
 	}
 

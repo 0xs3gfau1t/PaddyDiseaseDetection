@@ -14,7 +14,7 @@ import {
 import { Card } from 'react-native-paper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-export default function UploadScreen() {
+export default function UploadScreen({ navigation }: any) {
   const [page, _] = useState(0);
   const [limit, __] = useState(5);
   const {
@@ -50,19 +50,19 @@ export default function UploadScreen() {
 
   return (
     <View style={styles.container}>
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          paddingBottom: 10,
+        }}
+      >
+        Upload History
+      </Text>
       <ScrollView style={{ width: '100%', padding: 10, borderRadius: 20 }}>
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            paddingBottom: 10,
-          }}
-        >
-          Upload History
-        </Text>
-        <Card style={styles.history}>
-          {data ? data.map((item) => <UploadItem item={item} key={item.id} />) : renderStats}
-        </Card>
+        {data
+          ? data.map((item) => <UploadItem item={item} key={item.id} navigation={navigation} />)
+          : renderStats}
       </ScrollView>
       <UploadNew onUpload={triggerFetch} />
 
@@ -83,9 +83,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: Dimensions.get('screen').width,
     opacity: 0.1,
-  },
-  history: {
-    width: '100%',
-    alignSelf: 'center',
+    zIndex: -1,
   },
 });
