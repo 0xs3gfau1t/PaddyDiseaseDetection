@@ -23,7 +23,7 @@ var fc = geojson.NewFeatureCollection()
 var c jsoniter.API
 
 func init() {
-	f, err := os.Open("nepal.geojson")
+	f, err := os.Open("pkg/location/nepal.geojson")
 	if err != nil {
 		log.Fatal(err)
 		return
