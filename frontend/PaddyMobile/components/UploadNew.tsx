@@ -27,8 +27,11 @@ export default function UploadNew({ onUpload }: { onUpload: () => void }) {
       try {
         const respMessage = JSON.parse(resp.body);
         alert(respMessage.message);
-      } catch (e) {}
+      } catch (e) {
+        console.error(e);
+      }
     } catch (e) {
+      console.error(e);
       alert("Couldn't upload image");
     }
     setIsSending(false);

@@ -5,8 +5,7 @@ import { ActivityIndicator, Card } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function UploadItem({ item }: any) {
-  const itemNew =
-    item.status !== STATUS.processed ? useFetchUploaded({ id: item.id, item: item }) : item;
+  const itemNew = useFetchUploaded({ id: item.id, item: item });
 
   let renderStatIcon = <ActivityIndicator />;
   if (itemNew.status === STATUS.processed)
