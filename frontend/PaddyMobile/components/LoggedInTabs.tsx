@@ -1,11 +1,17 @@
 import { pagesIcons } from '@/constants/TabIcons';
+import pages from '@/constants/screens';
+import { useMemo } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Card } from 'react-native-paper';
 
 export default function LoggedInTabs({ state, descriptors, navigation }: any) {
+  const viewableTabs = useMemo(
+    () => state.routes.filter((r: any) => r.name !== pages.detail),
+    [state.routes]
+  );
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-      {state.routes.map((route: any, index: number) => {
+      {viewableTabs.map((route: any, index: number) => {
         const { options } = descriptors[route.key];
         const label =
           options.tabBarLabel !== undefined

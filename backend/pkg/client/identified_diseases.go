@@ -259,10 +259,10 @@ func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.U
 
 	for _, uploadItem := range diseases {
 
-		imageLink := ""
-		if image := uploadItem.Edges.Image; image != nil {
+		var imageLinks []string
+		for _, image := range uploadItem.Edges.Image {
 			if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
-				imageLink = imgLink
+				imageLinks = append(imageLinks, imgLink)
 			}
 		}
 
@@ -276,7 +276,7 @@ func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.U
 			Name:     diseaseName,
 			Status:   uploadItem.Status.String(),
 			Severity: uploadItem.Severity,
-			Images:   imageLink,
+			Images:   imageLinks,
 		})
 	}
 	return cleanedUploads, nil
@@ -288,24 +288,42 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		return nil, err
 	}
 
-	imageLink := ""
-	if image := diseases.Edges.Image; image != nil {
+	var imageLinks []string
+	for _, image := range diseases.Edges.Image {
 		if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
-			imageLink = imgLink
+			imageLinks = append(imageLinks, imgLink)
 		}
 	}
 
-	diseaseName := "N/A"
+	var identified *types.IdentifiedDiseaseEntity
+	var solutions []*types.SolutionEntity
+
 	if disease := diseases.Edges.Disease; disease != nil {
-		diseaseName = disease.Name
+		identified = &types.IdentifiedDiseaseEntity{
+			Name: disease.Name,
+			Id:   disease.ID.String(),
+		}
+
+		if solutionsFromDB, err := disease.QuerySolutions().All(context.Background()); err == nil {
+			for _, solutionFromDB := range solutionsFromDB {
+				solutions = append(solutions, &types.SolutionEntity{
+					Id:          solutionFromDB.ID.String(),
+					Name:        solutionFromDB.Name,
+					Photos:      solutionFromDB.Photos,
+					Description: solutionFromDB.Description,
+					Ingredients: solutionFromDB.Ingredients,
+				})
+			}
+		}
 	}
 
 	cleanedUploads := types.UploadedEntity{
-		Id:       diseases.ID.String(),
-		Name:     diseaseName,
-		Status:   diseases.Status.String(),
-		Severity: diseases.Severity,
-		Images:   imageLink,
+		Id:         diseases.ID.String(),
+		Status:     diseases.Status.String(),
+		Severity:   diseases.Severity,
+		Images:     imageLinks,
+		Identified: identified,
+		Solutions:  solutions,
 	}
 	return &cleanedUploads, nil
 }

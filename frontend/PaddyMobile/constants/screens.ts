@@ -6,6 +6,7 @@ export const pages = {
   profile: 'Profile',
   live: 'Live',
   upload: 'Upload',
+  detail: 'Detail',
 };
 
 export default pages;

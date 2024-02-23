@@ -1,12 +1,12 @@
 import { useFetchUploaded } from '@/api/disease/fetch-diseases';
 import { STATUS } from '@/constants/misc';
-import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
+import pages from '@/constants/screens';
+import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Card } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function UploadItem({ item }: any) {
-  const itemNew =
-    item.status !== STATUS.processed ? useFetchUploaded({ id: item.id, item: item }) : item;
+export default function UploadItem({ item, navigation }: any) {
+  const itemNew = useFetchUploaded({ id: item.id, item: item });
 
   let renderStatIcon = <ActivityIndicator />;
   if (itemNew.status === STATUS.processed)
@@ -15,17 +15,19 @@ export default function UploadItem({ item }: any) {
     renderStatIcon = <MaterialCommunityIcons name='timer' size={20} style={{ color: 'purple' }} />;
 
   return (
-    <Card style={{ marginVertical: 5, width: '90%', alignSelf: 'center' }}>
-      <View style={styles.historyItem}>
-        <Image
-          source={item.images ? { uri: item.images } : require('@/assets/icons/tea.png')}
-          style={styles.diseaseImage}
-        />
-        <Text style={{ width: 160 }}>{itemNew.name}</Text>
-        <Text style={{ width: 20 }}>{itemNew.severity}</Text>
-        {renderStatIcon}
-      </View>
-    </Card>
+    <Pressable onPress={() => navigation.navigate(pages.detail, { id: item.id })}>
+      <Card style={{ marginVertical: 5, width: '90%', alignSelf: 'center' }}>
+        <View style={styles.historyItem}>
+          <Image
+            source={item.images ? { uri: item.images[0] } : require('@/assets/icons/tea.png')}
+            style={styles.diseaseImage}
+          />
+          <Text style={{ width: 160 }}>{itemNew.name}</Text>
+          <Text style={{ width: 20 }}>{itemNew.severity}</Text>
+          {renderStatIcon}
+        </View>
+      </Card>
+    </Pressable>
   );
 }
 
