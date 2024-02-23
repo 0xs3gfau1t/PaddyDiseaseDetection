@@ -40,7 +40,7 @@ transform2 = transforms.Compose([
 ])
 
 def myPred(path):
-    im = read_image(path)
+    im = read_image(path)[:3]
     im = transform2(im).unsqueeze(0)
     pred = model(im)
     dis = diseases[pred.argmax().tolist()]
