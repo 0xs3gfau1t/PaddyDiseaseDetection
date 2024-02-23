@@ -1,7 +1,12 @@
 import { uploader } from '@/api/driver';
 import endpoints from '@/constants/endpoints';
 import { AuthContext } from '@/contexts/auth/auth-provider';
-import { MediaTypeOptions, launchCameraAsync, launchImageLibraryAsync } from 'expo-image-picker';
+import {
+  ImagePickerOptions,
+  MediaTypeOptions,
+  launchCameraAsync,
+  launchImageLibraryAsync,
+} from 'expo-image-picker';
 import { useContext, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';

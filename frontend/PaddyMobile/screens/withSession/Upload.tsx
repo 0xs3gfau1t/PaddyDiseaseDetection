@@ -11,7 +11,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Card } from 'react-native-paper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 export default function UploadScreen({ navigation }: any) {
@@ -31,6 +30,7 @@ export default function UploadScreen({ navigation }: any) {
             width: '100%',
             gap: 20,
             alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <ActivityIndicator size={50} />

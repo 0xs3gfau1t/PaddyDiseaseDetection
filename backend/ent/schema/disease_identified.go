@@ -26,6 +26,6 @@ func (DiseaseIdentified) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("uploaded_by", User.Type).Unique().Required(),
 		edge.To("disease", Disease.Type).Unique(),
-		edge.From("image", Image.Type).Ref("disease_identified").Unique(),
+		edge.From("image", Image.Type).Ref("disease_identified"),
 	}
 }

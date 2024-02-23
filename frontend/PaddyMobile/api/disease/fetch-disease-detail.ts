@@ -6,7 +6,7 @@ import { UploadDetailType } from '@/types/misc';
 
 export default function useFetchDiseaseDetail({ id }: { id: string }) {
   const [detail, setDetail] = useState<null | UploadDetailType>(null);
-  const [fetching, setFetching] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {

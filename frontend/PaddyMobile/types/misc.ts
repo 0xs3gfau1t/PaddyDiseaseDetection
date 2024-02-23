@@ -25,10 +25,27 @@ export type LocationType = {
   longitude: number;
 };
 
+export type CausesType = {
+  name: string;
+  image: string;
+};
+export type SolutionType = {
+  name: string;
+  photos: string[];
+  ingredients: string[];
+  description: string;
+  id: string;
+};
+
 export type UploadDetailType = {
   images: string[];
-  name: string;
   severity: string;
   staus: string;
   id: string;
+  solutions: SolutionType[];
+  identified: {
+    name: string;
+    id: string;
+  };
+  causes: CausesType[];
 };
