@@ -74,7 +74,7 @@ export function useFetchUploaded({ id, item }: { id: string; item: any }) {
     })
       .then((r) => {
         if (r.success) setItemNew(r.data);
-        if (r.data.status !== STATUS.queued) setTimeout(() => setTick(tick + 1), 1000);
+        if (r.data.status === STATUS.queued) setTimeout(() => setTick(tick + 1), 1000);
         else throw new Error();
       })
       .catch((e) => {
