@@ -30,6 +30,7 @@ type IdentifiedDiseasesClient interface {
 	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
 	GetUploads(*uuid.UUID) ([]*types.UploadedEntity, error)
 	GetUpload(*uuid.UUID, *uuid.UUID) (*types.UploadedEntity, error)
+	GetMapEntries() ([]types.HeatMapEntry, error)
 }
 
 type IdentifiedDiseases struct {
@@ -326,4 +327,23 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		Solutions:  solutions,
 	}
 	return &cleanedUploads, nil
+}
+
+func (idiseaseCli IdentifiedDiseases) GetMapEntries() ([]types.HeatMapEntry, error) {
+	data, err := idiseaseCli.dbDiseaseIdentified.Query().Where(diseaseidentified.StatusEQ("processed")).All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	var response []types.HeatMapEntry
+	for _, entry := range data {
+		latitude, longitude, _ := location.ParseDbLocation(entry.Location)
+		response = append(response, types.HeatMapEntry{
+			Latitude:  latitude.ToFloat(),
+			Longitude: longitude.ToFloat(),
+			Weight:    entry.Severity,
+		})
+	}
+
+	return response, nil
 }
