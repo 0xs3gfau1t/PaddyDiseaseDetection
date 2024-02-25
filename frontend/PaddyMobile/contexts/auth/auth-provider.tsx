@@ -6,14 +6,20 @@ import { TOKEN_HOLDER } from '@/constants/auth';
 import { fetcher } from '@/api/driver';
 import endpoints from '@/constants/endpoints';
 
-export const AuthContext = createContext({
+export const AuthContext = createContext<AuthContextType>({
   isFetching: true,
   token: null,
   userData: null,
-} as AuthContextType);
+  setToken: (_token) => {},
+  removeToken: () => {},
+});
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [authState, setAuthState] = useState<AuthState>({} as AuthContextType);
+  const [authState, setAuthState] = useState<AuthState>({
+    isFetching: true,
+    token: null,
+    userData: null,
+  });
 
   useEffect(() => {
     const token = getItem(TOKEN_HOLDER);
