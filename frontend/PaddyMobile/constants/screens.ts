@@ -7,6 +7,7 @@ export const pages = {
   live: 'Live',
   upload: 'Upload',
   detail: 'Detail',
+  heatMap: 'HeatMap'
 };
 
 export default pages;
