@@ -23,6 +23,7 @@ go build
 echo "Spawning 5 backend processed"
 for i in {8000..8005};do
   ./PaddyDiseaseDetection server -p $i &
+  disown
 done
 echo "Installation complete. Setting up Nginx now."
 sudo echo """
@@ -38,6 +39,8 @@ http {
     server 127.0.0.1:8001;
     server 127.0.0.1:8002;
     server 127.0.0.1:8003;
+    server 127.0.0.1:8004;
+    server 127.0.0.1:8005;
   }
 
   server {
@@ -55,3 +58,5 @@ sudo systemctl restart nginx
 echo "Setting up port forwarding for rabbitmq management"
 sudo apt-get install socat -y && sudo socat tcp-listen:3000,fork tcp:10.0.2.201:15672&
 disown
+
+echo "Server setup complete"
