@@ -12,6 +12,7 @@ const endpoints = {
     root: `${API_ROOT}/profile`,
     changePassword: `${API_ROOT}/profile/change_password`,
   },
+  map: `${API_ROOT}/heatmap`,
   uploadImage: `${API_ROOT}/upload`,
   diseases: `${API_ROOT}/uploads`,
   disease: `${API_ROOT}/upload`,

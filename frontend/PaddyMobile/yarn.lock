@@ -6684,10 +6684,10 @@ react-native-gesture-handler@~2.14.0:
     lodash "^4.17.21"
     prop-types "^15.7.2"
 
-react-native-maps@^1.10.0:
-  version "1.10.1"
-  resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-1.10.1.tgz#ced65efb38aecdab7be46a47417f1018fd42959e"
-  integrity sha512-EFRW4Zfy1xAfm2/J2XStS+yPf0NtRxwMpyfhwVZb3P3Nf3Id6mI7ZUuQU2U9ymaX0BIZJpdD+Qn1LGhp8PIVsw==
+react-native-maps@^1.10.3:
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-1.10.3.tgz#a669ee3a8baa01d30c5c7af7bdc498428d0e8284"
+  integrity sha512-P8/Viq5vgW9FRhvfDFQHxq02cZUcDJu6VbBZar7c/voGDbD5nrTIA0qlpiUAmrs1ikd8+7S4QjXQlorppBBMvA==
   dependencies:
     "@types/geojson" "^7946.0.13"
 

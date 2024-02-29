@@ -31,4 +31,5 @@ func InitApiRoutes(e *echo.Echo) {
 	e.DELETE("/api/profile", handlers.DeleteProfileHandler, middlewareslocal.JwtMiddleware)
 	e.POST("/api/profile/change_password", handlers.ChangePassHandler, middlewareslocal.JwtMiddleware)
 	e.DELETE("/api/disease", handlers.RemoveIdentifiedDiseaseHandler, middlewareslocal.JwtMiddleware)
+	e.GET("/api/heatmap", handlers.GetMapDataHandler)
 }

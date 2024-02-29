@@ -27,3 +27,9 @@ type UploadedEntity struct {
 	Solutions  []*SolutionEntity        `json:"solutions"`
 	Identified *IdentifiedDiseaseEntity `json:"identified"`
 }
+
+type HeatMapEntry struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Weight    int     `json:"weight"`
+}
