@@ -32,3 +32,7 @@ variable "ml_server_private_ip" {
 variable "mq_admin_password" {
   default = "00000"
 }
+
+variable "postgresdb_name" {
+  default = "postgresdb-psqlflexibleserver"
+}

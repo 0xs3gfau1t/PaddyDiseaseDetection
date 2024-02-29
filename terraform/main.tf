@@ -238,7 +238,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "db_private_dns_zone_vn
 }
 
 resource "azurerm_postgresql_flexible_server" "db_server" {
-  name                   = "postgresdb-psqlflexibleserver"
+  name                   = var.postgresdb_name
   resource_group_name    = azurerm_resource_group.rg.name
   location               = azurerm_resource_group.rg.location
   version                = "12"

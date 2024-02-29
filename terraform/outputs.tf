@@ -21,3 +21,7 @@ output "rabbitmq_private_ip" {
 output "dababase_private_dns" {
   value = azurerm_private_dns_zone.db_private_dns_zone.name
 }
+
+output "database_connection_uri" {
+ value = azurerm_postgresql_flexible_server.db_server.name 
+}
