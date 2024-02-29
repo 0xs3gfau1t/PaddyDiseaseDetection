@@ -17,3 +17,7 @@ output "username" {
 output "rabbitmq_private_ip" {
   value = azurerm_linux_virtual_machine.rabbitmq_server.private_ip_address
 }
+
+output "dababase_private_dns" {
+  value = azurerm_private_dns_zone.db_private_dns_zone.name
+}

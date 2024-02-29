@@ -5,12 +5,7 @@ terraform {
       version = "~> 3.0.2"
     }
   }
-  cloud {
-    organization = "0xsegFault"
-    workspaces {
-      name = "MajorProject"
-    }
-  }
+
   required_version = ">= 1.1.0"
 }
 
@@ -61,6 +56,24 @@ resource "azurerm_network_interface" "webserver_nic" {
   }
 }
 
+resource "azurerm_subnet" "db_subnet" {
+  name                 = "db-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.3.0/24"]
+
+  service_endpoints = ["Microsoft.Storage"]
+  delegation {
+    name = "fs"
+    service_delegation {
+      name = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
+}
+
 resource "azurerm_linux_virtual_machine" "webserver" {
   name                = "webserver"
   resource_group_name = azurerm_resource_group.rg.name
@@ -87,30 +100,6 @@ resource "azurerm_linux_virtual_machine" "webserver" {
     sku       = "22_04-lts"
     version   = "latest"
   }
-}
-
-resource "azurerm_postgresql_server" "backend_postgres_server" {
-  name                             = "segfault-postgresql-server"
-  location                         = azurerm_resource_group.rg.location
-  resource_group_name              = azurerm_resource_group.rg.name
-  sku_name                         = "B_Gen5_2"
-  storage_mb                       = 5120
-  backup_retention_days            = 7
-  geo_redundant_backup_enabled     = false
-  auto_grow_enabled                = false
-  administrator_login              = var.ssh_username
-  administrator_login_password     = var.postgres_password
-  ssl_enforcement_enabled          = false
-  ssl_minimal_tls_version_enforced = "TLSEnforcementDisabled"
-  version                          = 9.5
-}
-
-resource "azurerm_postgresql_database" "backend_db" {
-  name                = "postgresql"
-  resource_group_name = azurerm_resource_group.rg.name
-  server_name         = azurerm_postgresql_server.backend_postgres_server.name
-  charset             = "UTF8"
-  collation           = "English_United States.1252"
 }
 
 resource "azurerm_network_interface" "ml_machine_nic" {
@@ -233,4 +222,34 @@ resource "azurerm_linux_virtual_machine" "rabbitmq_server" {
     offer     = "debian-11"
     publisher = "Debian"
   }
+}
+
+resource "azurerm_private_dns_zone" "db_private_dns_zone" {
+  name                = "paddy.postgres.database.azure.com"
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "db_private_dns_zone_vnet_link" {
+  name                  = "paddydbVnet.com"
+  private_dns_zone_name = azurerm_private_dns_zone.db_private_dns_zone.name
+  virtual_network_id    = azurerm_virtual_network.vnet.id
+  resource_group_name   = azurerm_resource_group.rg.name
+  depends_on            = [azurerm_subnet.db_subnet]
+}
+
+resource "azurerm_postgresql_flexible_server" "db_server" {
+  name                   = "postgresdb-psqlflexibleserver"
+  resource_group_name    = azurerm_resource_group.rg.name
+  location               = azurerm_resource_group.rg.location
+  version                = "12"
+  delegated_subnet_id    = azurerm_subnet.db_subnet.id
+  private_dns_zone_id    = azurerm_private_dns_zone.db_private_dns_zone.id
+  administrator_login    = var.ssh_username
+  administrator_password = var.postgres_password
+  zone                   = "1"
+
+  storage_mb = 32768
+
+  sku_name   = "B_Standard_B1ms"
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.db_private_dns_zone_vnet_link]
 }
