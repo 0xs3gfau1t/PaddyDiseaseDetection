@@ -25,7 +25,7 @@ for i in {8000..8005};do
   ./PaddyDiseaseDetection server -p $i &
 done
 echo "Installation complete. Setting up Nginx now."
-echo """
+sudo echo """
 user www-data;
 worker_processes auto;
 pid /run/nginx.pid;
@@ -47,7 +47,8 @@ http {
     }
   }
 }
-"""
+""" >> /etc/nginx/nginx.conf
+sudo systemctl restart nginx
 
 
 # Setup port forward with socat
