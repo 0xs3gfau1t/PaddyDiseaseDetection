@@ -19,7 +19,7 @@ func GetFileExtension(name string) string {
 }
 func IsFileAllowed(fileName string, file *bytes.Buffer) (string, error) {
 	ext := GetFileExtension(fileName)
-	if !filetype.IsImage(file.Bytes()) || !filetype.Is(file.Bytes(), ext) || !(filetype.IsMIME(file.Bytes(), "image/png") || filetype.IsMIME(file.Bytes(), "image/jpeg")) {
+	if !filetype.IsImage(file.Bytes()) {
 		return fileName, errors.New("Unsupported file type")
 	}
 	fileName = fmt.Sprintf("%v.%v", uuid.New(), ext)

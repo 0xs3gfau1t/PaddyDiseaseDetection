@@ -21,7 +21,7 @@ export default function useFetchDiseaseDetail({ id }: { id: string }) {
         console.error(e);
       })
       .finally(() => setFetching(false));
-  }, []);
+  }, [id]);
 
   return { detail, fetching };
 }
