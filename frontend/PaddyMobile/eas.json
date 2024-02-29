@@ -10,9 +10,12 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
+    "production": {
+      "env": {
+        "BASE_API_URL": "4.188.251.236",
+        "NODE_ENV": "production"
+      },
+      "distribution": "internal"
+    }
   }
 }
