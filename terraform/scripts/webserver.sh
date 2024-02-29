@@ -5,17 +5,15 @@ sudo apt-get install -y nginx
 sudo systemctl enable nginx --now
 
 echo "Fetch go binary"
-sudo apt-get install golang-go
+sudo apt-get install -y golang-go
 wget https://go.dev/dl/go1.21.3.linux-amd64.tar.gz
 echo "Extracting go archive"
 sudo tar -C /usr/local -xzf go1.21.3.linux-amd64.tar.gz
 echo "Setting GOPATH"
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 
-echo "Cloning backend project"
-git clone git@github.com-paddydiseasedetection:0xs3gfau1t/paddydiseasedetection.git
-cd paddydiseasedetection/backend
 echo "Generating db functions"
+cd ~/paddydiseasedetection/backend
 go run -mod=mod entgo.io/ent/cmd/ent generate .ent/schema
 echo "Installing api binary"
 go build
