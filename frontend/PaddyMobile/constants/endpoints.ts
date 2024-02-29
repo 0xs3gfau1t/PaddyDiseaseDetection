@@ -1,4 +1,5 @@
-const API_ROOT = 'http://192.168.10.107:3000/api';
+import { BASE_API_URL } from '@env';
+const API_ROOT = `http://${BASE_API_URL}/api`;
 
 const endpoints = {
   auth: {

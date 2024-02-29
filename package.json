@@ -12,6 +12,8 @@
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
-    "husky": "^8.0.3"
+    "@types/react-native-dotenv": "^0.2.2",
+    "husky": "^8.0.3",
+    "react-native-dotenv": "^3.4.11"
   }
 }
