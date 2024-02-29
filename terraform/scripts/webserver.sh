@@ -5,6 +5,7 @@ sudo apt-get install -y nginx
 sudo systemctl enable nginx --now
 
 echo "Fetch go binary"
+sudo apt-get install golang-go
 wget https://go.dev/dl/go1.21.3.linux-amd64.tar.gz
 echo "Extracting go archive"
 sudo tar -C /usr/local -xzf go1.21.3.linux-amd64.tar.gz
@@ -20,7 +21,7 @@ echo "Installing api binary"
 go build
 echo "Installation complete. Setup Nginx now."
 
-read -p "Do you want to setup rabbitmq port forwarding? (y/n)\n" optn
+read -p "Do you want to setup rabbitmq port forwarding? (y/n) => " optn
 if [[ "$optn" != "y" ]];then
   exit
 fi
