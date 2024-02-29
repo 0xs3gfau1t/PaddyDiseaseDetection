@@ -10,7 +10,10 @@ wget https://go.dev/dl/go1.21.3.linux-amd64.tar.gz
 echo "Extracting go archive"
 sudo tar -C /usr/local -xzf go1.21.3.linux-amd64.tar.gz
 echo "Setting GOPATH"
-echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+sudo apt-get remove golang-go
+sudo apt-get autoremove
+source ~/.bashrc
 
 echo "Generating db functions"
 cd ~/paddydiseasedetection/backend
