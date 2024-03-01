@@ -32,17 +32,21 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.krishak",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "config": {
+        "googleMaps": {
+          "apiKey": "ADD_API_KEY_HERE_FOR_FIRST_BUILD_ELSE_APP_CRASHES_ON_MAP_USE"
+        }
+      },
       "permissions": [
-        "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE"
-      ],
-      "package": "com.krishak"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -51,6 +55,12 @@
       "eas": {
         "projectId": "f6dbecfd-64fb-4f44-99e2-88b3672825a3"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f6dbecfd-64fb-4f44-99e2-88b3672825a3"
     }
   }
 }

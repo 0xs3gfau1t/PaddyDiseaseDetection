@@ -17,7 +17,7 @@ func init() {
 	log.Println("Testing rabbit client")
 
 	// Param: test: true to close connection, used by startup test
-	conn, err := amqp091.Dial("amqp://" + os.Getenv("RABBIT_USER") + ":" + os.Getenv("RABBIT_PASS") + "@" + os.Getenv("RABBIT_HOST") + ":" + os.Getenv("RABBIT_PORT"))
+	conn, err := amqp091.Dial("amqp://" + os.Getenv("RABBIT_USER") + ":" + os.Getenv("RABBIT_PASS") + "@" + os.Getenv("RABBIT_HOST") + ":" + os.Getenv("RABBIT_PORT") + "/" + os.Getenv("RABBIT_VHOST"))
 	if err != nil {
 		log.Println("[x] Couldn't create a rabbit connection")
 		log.Println(err)

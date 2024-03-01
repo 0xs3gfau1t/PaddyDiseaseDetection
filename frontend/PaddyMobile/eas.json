@@ -1,0 +1,25 @@
+{
+  "cli": {
+    "version": ">= 7.1.3"
+  },
+  "build": {
+    "development": {
+      "env": {
+        "BASE_API_URL": "4.188.251.236",
+        "NODE_ENV": "development"
+      },
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "release": {
+      "env": {
+        "BASE_API_URL": "4.188.251.236",
+        "NODE_ENV": "production",
+        "APP_VARIANT": "release"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}

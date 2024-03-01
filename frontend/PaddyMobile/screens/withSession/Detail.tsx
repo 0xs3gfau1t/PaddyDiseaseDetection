@@ -102,7 +102,7 @@ function SolutionsView({ solutions, causes }: { solutions: SolutionType[]; cause
         </Text>
 
         {solutions.map((s) => (
-          <SolutionItemView detail={s} />
+          <SolutionItemView detail={s} key={s.id} />
         ))}
       </View>
     </View>

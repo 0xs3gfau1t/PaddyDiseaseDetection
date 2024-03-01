@@ -2,7 +2,7 @@ import { LocationType } from '@/types/misc';
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location';
 import { createRef, useEffect, useState } from 'react';
 import { Button, StyleSheet, View } from 'react-native';
-import MapView, { MapMarker, MapPressEvent, Marker } from 'react-native-maps';
+import MapView, { MapMarker, MapPressEvent, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Card } from 'react-native-paper';
 
 export default function LocationPicker({
@@ -54,6 +54,8 @@ export default function LocationPicker({
         region={pickedLoc ? { ...pickedLoc, latitudeDelta: 0.03, longitudeDelta: 0.03 } : undefined}
         ref={mapRef}
         onPress={handleMapPress}
+        provider={PROVIDER_GOOGLE}
+        mapType='standard'
       >
         {pickedLoc && <Marker coordinate={pickedLoc} ref={markerRef} />}
       </MapView>

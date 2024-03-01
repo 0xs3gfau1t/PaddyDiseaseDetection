@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
 	"segFault/PaddyDiseaseDetection/pkg/server"
 
 	"github.com/spf13/cobra"
@@ -9,7 +11,12 @@ import (
 var serverPort string
 
 func init() {
-	serverCmd.Flags().StringVarP(&serverPort, "port", "p", "3000", "server port")
+	sP := os.Getenv("HOST_PORT")
+	fmt.Println("Got port: ", sP)
+	if sP == "" {
+		sP = "3000"
+	}
+	serverCmd.Flags().StringVarP(&serverPort, "port", "p", sP, "server port")
 }
 
 var serverCmd = &cobra.Command{
