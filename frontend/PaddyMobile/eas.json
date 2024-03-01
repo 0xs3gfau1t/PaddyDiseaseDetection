@@ -11,10 +11,11 @@
       "developmentClient": true,
       "distribution": "internal"
     },
-    "production": {
+    "release": {
       "env": {
         "BASE_API_URL": "4.188.251.236",
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "APP_VARIANT": "release"
       },
       "android": {
         "buildType": "apk"

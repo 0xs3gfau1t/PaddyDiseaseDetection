@@ -55,6 +55,7 @@ export default function LocationPicker({
         ref={mapRef}
         onPress={handleMapPress}
         provider={PROVIDER_GOOGLE}
+        mapType='standard'
       >
         {pickedLoc && <Marker coordinate={pickedLoc} ref={markerRef} />}
       </MapView>
