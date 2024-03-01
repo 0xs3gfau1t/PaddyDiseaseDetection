@@ -43,19 +43,6 @@ resource "azurerm_public_ip" "webserver_public_ip" {
   allocation_method   = "Static"
 }
 
-resource "azurerm_network_interface" "webserver_nic" {
-  name                = "webserver-nic"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = var.webserver_private_ip
-    public_ip_address_id          = azurerm_public_ip.webserver_public_ip.id
-  }
-}
-
 resource "azurerm_subnet" "db_subnet" {
   name                 = "db-subnet"
   resource_group_name  = azurerm_resource_group.rg.name
@@ -71,6 +58,19 @@ resource "azurerm_subnet" "db_subnet" {
         "Microsoft.Network/virtualNetworks/subnets/join/action",
       ]
     }
+  }
+}
+
+resource "azurerm_network_interface" "webserver_nic" {
+  name                = "webserver-nic"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.subnet.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = var.webserver_private_ip
+    public_ip_address_id          = azurerm_public_ip.webserver_public_ip.id
   }
 }
 

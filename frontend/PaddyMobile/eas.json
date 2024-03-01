@@ -4,18 +4,21 @@
   },
   "build": {
     "development": {
+      "env": {
+        "BASE_API_URL": "4.188.251.236",
+        "NODE_ENV": "development"
+      },
+      "android": {
+        "buildType": "apk"
+      },
       "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
       "distribution": "internal"
     },
     "production": {
       "env": {
         "BASE_API_URL": "4.188.251.236",
         "NODE_ENV": "production"
-      },
-      "distribution": "internal"
+      }
     }
   }
 }

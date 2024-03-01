@@ -27,7 +27,9 @@
         }
       ]
     ],
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -51,6 +53,12 @@
       "eas": {
         "projectId": "f6dbecfd-64fb-4f44-99e2-88b3672825a3"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f6dbecfd-64fb-4f44-99e2-88b3672825a3"
     }
   }
 }
