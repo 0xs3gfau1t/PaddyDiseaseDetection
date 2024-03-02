@@ -19,12 +19,12 @@ type LocationExtractorFromUser struct {
 func (le *LocationExtractorFromUser) GetLocation() (Location, Location, error) {
 	emptyLocation := Location{}
 
-	user, err := le.Db.User.Query().Unique(true).Where(user.ID(le.Userid)).Select(user.FieldLocation).First(context.Background())
+	user, err := le.Db.User.Query().Unique(true).Where(user.ID(le.Userid)).Select(user.FieldCoord).First(context.Background())
 	if err != nil {
 		return emptyLocation, emptyLocation, fmt.Errorf("User not found:%w", err)
 	}
 
-	parts := strings.Split(user.Location, " ")
+	parts := strings.Split(user.Coord, " ")
 	if len(parts) != 2 {
 		return emptyLocation, emptyLocation, fmt.Errorf("Invalid location format")
 	}
