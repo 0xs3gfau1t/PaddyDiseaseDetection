@@ -14,19 +14,27 @@ type SolutionEntity struct {
 }
 
 type IdentifiedDiseaseEntity struct {
-	Name      string            `json:"name"`
 	Id        string            `json:"id"`
+	Name      string            `json:"name"`
 	Solutions []*SolutionEntity `json:"solutions"`
 }
 
 type UploadedEntity struct {
 	Id         string                     `json:"id"`
 	Name       []string                   `json:"name"`
-	Images     []string                   `json:"images"`
 	Severity   int                        `json:"severity"`
 	Status     string                     `json:"status"`
+	Images     []string                   `json:"images"`
 	Roi        string                     `json:"roi"`
 	Identified []*IdentifiedDiseaseEntity `json:"identified"`
+}
+
+type UploadListItemType struct {
+	Id       string   `json:"id"`
+	Name     []string `json:"name"`
+	Severity int      `json:"severity"`
+	Status   string   `json:"status"`
+	Images   []string `json:"images"`
 }
 
 type HeatMapEntry struct {

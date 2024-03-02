@@ -10,7 +10,7 @@ import (
 )
 
 type UploadsResponse struct {
-	Uploads []*types.UploadedEntity `json:"data"`
+	Uploads []*types.UploadListItemType `json:"data"`
 }
 
 type UploadResponse struct {

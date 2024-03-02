@@ -12,6 +12,10 @@ type NoUserReturn struct {
 	Error string `json:"error"`
 }
 
+type UploadResponseType struct {
+	Message string `json:"message"`
+}
+
 func UploadHandler(c echo.Context) error {
 	user, ok := c.Get("user").(types.AuthenticatedUserRequestValues)
 	if !ok {
@@ -32,5 +36,5 @@ func UploadHandler(c echo.Context) error {
 	if err := client.Cli.IdentifiedDiseases.UploadImages(&images, &user.Id, c.Request()); err != nil {
 		return c.JSONBlob(http.StatusInternalServerError, []byte(err.Error()))
 	}
-	return nil
+	return c.JSON(http.StatusOK, &UploadResponseType{Message: "Successfully uploaded image."})
 }

@@ -30,11 +30,11 @@ export type CausesType = {
   image: string;
 };
 export type SolutionType = {
+  id: string;
   name: string;
   photos: string[];
   ingredients: string[];
   description: string;
-  id: string;
 };
 
 export type ROI = {
@@ -46,13 +46,14 @@ export type ROI = {
 };
 
 export type UploadDetailType = {
-  images: string[];
-  severity: string;
-  staus: string;
   id: string;
+  name: string[];
+  images: string[];
+  severity: number;
+  staus: string;
   identified: {
-    name: string;
     id: string;
+    name: string;
     solutions: SolutionType[];
   }[];
   roi: string;
@@ -61,9 +62,8 @@ export type UploadDetailType = {
 
 export type UploadListItemType = {
   id: string;
-  images: string[];
-  identified: string | null;
-  status: string;
+  name: string[];
   severity: number;
-  name: string[] | null;
+  status: string;
+  images: string[];
 };
