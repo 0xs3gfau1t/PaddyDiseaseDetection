@@ -17,6 +17,7 @@ const endpoints = {
   uploadImage: `${API_ROOT}/upload`,
   diseases: `${API_ROOT}/uploads`,
   disease: `${API_ROOT}/upload`,
+  diseaseStat: `${API_ROOT}/uploadStat`,
 };
 
 export default endpoints;

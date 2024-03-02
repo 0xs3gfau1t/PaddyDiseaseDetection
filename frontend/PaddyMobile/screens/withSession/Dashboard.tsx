@@ -23,7 +23,6 @@ const mockedData = {
 export default function DashboardScreen() {
   const { token, removeToken } = useContext(AuthContext);
   const { data, loading } = useGetDashboard(token);
-  console.log(data);
 
   if (loading)
     return (
