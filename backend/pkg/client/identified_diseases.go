@@ -325,6 +325,7 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		Severity:   diseases.Severity,
 		Images:     imageLinks,
 		Identified: identified,
+		Roi:        diseases.Roi,
 	}
 	return &cleanedUploads, nil
 }

@@ -25,6 +25,7 @@ type UploadedEntity struct {
 	Images     []string                   `json:"images"`
 	Severity   int                        `json:"severity"`
 	Status     string                     `json:"status"`
+	Roi        string                     `json:"roi"`
 	Identified []*IdentifiedDiseaseEntity `json:"identified"`
 }
 
