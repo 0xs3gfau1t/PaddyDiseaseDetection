@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,13 +18,6 @@ import Carousel from 'react-native-reanimated-carousel';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-const _mockCauses = [
-  {
-    name: 'Bacteria',
-    image:
-      'https://fastly.picsum.photos/id/620/200/300.jpg?hmac=ZLg-jrbFo8ASzAzQlxN4yMTNJJBpZtcpDXfwBxAvcT4',
-  },
-];
 function ROIBox({ roi, parentDim }: { roi: ROI; parentDim: { width: number; height: number } }) {
   return (
     <View
@@ -55,23 +49,15 @@ function CarouselRenderItem({
   );
 }
 
-function CarouselRenderCauseItem({ item }: { item: { name: string; image: string } }) {
-  return (
-    <View style={{ flex: 1 }}>
-      <Image source={{ uri: item.image }} style={{ flex: 1, width: '100%', height: '100%' }} />
-      <Text style={{ textAlign: 'center' }}>{item.name}</Text>
-    </View>
-  );
-}
-
-function CarouselRenderItemSolution({ item }: { item: string }) {
+function CarouselImageItem({ item }: { item: string }) {
   return <Image source={{ uri: item }} style={{ flex: 1, width: '100%', height: '100%' }} />;
 }
 
 export default function DetailScreen() {
   const { params } = useRoute<any>();
-  const { detail, fetching } = useFetchDiseaseDetail({ id: params?.id });
+  const { detail, fetching, triggerFetch } = useFetchDiseaseDetail({ id: params?.id });
   const [parentDim, setDimensions] = useState({ width: 0, height: 0 });
+  const [refreshing, _setRefreshing] = useState(false);
   const [roi, setRoi] = useState([] as ROI[]);
 
   useEffect(
@@ -83,7 +69,9 @@ export default function DetailScreen() {
   if (!fetching && !detail) renderContent = <Text>Error while fetching</Text>;
   else if (detail)
     renderContent = (
-      <ScrollView>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={triggerFetch} />}
+      >
         <View
           onLayout={(event) =>
             setDimensions({
@@ -104,100 +92,122 @@ export default function DetailScreen() {
             renderItem={CarouselRenderItem}
           />
         </View>
-        <View
+        <Text
           style={{
-            padding: 5,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            padding: 10,
+            fontSize: 20,
           }}
         >
-          <Text
-            style={{
-              fontWeight: 'bold',
-              textAlign: 'center',
-              padding: 10,
-              fontSize: 20,
-            }}
-          >
-            Identified Diseases
-          </Text>
-          <View
-            style={{
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              gap: 5,
-              justifyContent: 'center',
-            }}
-          >
-            {detail.identified.map((i) => (
-              <Card
+          Identified Diseases
+        </Text>
+        <View
+          style={{
+            flexWrap: 'wrap',
+            flexDirection: 'row',
+            gap: 5,
+            justifyContent: 'center',
+          }}
+        >
+          {detail.identified.map((i) => (
+            <Card
+              style={{
+                borderRadius: 4,
+                padding: 5,
+                alignSelf: 'center',
+              }}
+              key={i.id}
+            >
+              <Text
                 style={{
-                  padding: 5,
                   alignSelf: 'center',
+                  padding: 5,
                   backgroundColor: roi.reduce((prev, cur) => {
                     if (cur.name === formattedName(i.name)) return cur.color;
                     return prev;
                   }, 'white'),
                 }}
-                key={i.id}
               >
-                <Text>{i.name}</Text>
-              </Card>
-            ))}
-          </View>
+                {i.name}
+              </Text>
+              <View style={{ alignItems: 'center', paddingVertical: 10, gap: 5 }}>
+                <Text
+                  style={{
+                    paddingVertical: 5,
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    alignSelf: 'flex-start',
+                    textAlign: 'left',
+                  }}
+                >
+                  Solutions
+                </Text>
+
+                {i.solutions.map((s) => (
+                  <SolutionItemView detail={s} key={s.id} />
+                ))}
+              </View>
+              <View style={{ alignItems: 'center', paddingVertical: 10, gap: 5 }}>
+                <Text
+                  style={{
+                    paddingVertical: 5,
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    alignSelf: 'flex-start',
+                    textAlign: 'left',
+                  }}
+                >
+                  Causes
+                </Text>
+
+                {i.causes.map((s) => (
+                  <CauseItemView detail={s} key={s.id} />
+                ))}
+              </View>
+            </Card>
+          ))}
         </View>
-        <SolutionsView solutions={detail.identified[0]?.solutions || []} causes={detail.causes} />
       </ScrollView>
     );
 
   return <View style={styles.container}>{renderContent}</View>;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: Dimensions.get('screen').height * 0.04,
-    paddingHorizontal: Dimensions.get('screen').width * 0.02,
-    height: '100%',
-    gap: 10,
-  },
-  imgDimensions: {
-    width: Dimensions.get('screen').width * 0.7,
-    height: Dimensions.get('screen').height * 0.3,
-  },
-  diseaseName: {
-    fontSize: 20,
-    alignSelf: 'center',
-    paddingVertical: 10,
-  },
-  solutionsContainer: { marginHorizontal: 1 },
-});
+function CauseItemView({ detail }: { detail: CausesType }) {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-function SolutionsView({ solutions, causes }: { solutions: SolutionType[]; causes: CausesType[] }) {
   return (
-    <View style={styles.solutionsContainer}>
-      <Card style={{ alignItems: 'center', paddingBottom: 10 }}>
-        <Text style={{ paddingVertical: 3, fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>
-          Causes
-        </Text>
-        <Carousel
-          loop
-          width={styles.imgDimensions.width}
-          height={styles.imgDimensions.height}
-          data={_mockCauses}
-          renderItem={CarouselRenderCauseItem}
-        />
-      </Card>
-      <View style={{ alignItems: 'center', paddingVertical: 10, gap: 5 }}>
-        <Text style={{ paddingVertical: 5, fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>
-          Solutions
-        </Text>
-
-        {solutions.map((s) => (
-          <SolutionItemView detail={s} key={s.id} />
-        ))}
-      </View>
-    </View>
+    <Card style={{ padding: 15 }}>
+      <Pressable
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          width: '100%',
+          alignItems: 'center',
+        }}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
+        <Text style={{ fontWeight: 'bold' }}>{detail.name}</Text>
+        <AntDesign name={isExpanded ? 'up' : 'down'} />
+      </Pressable>
+      {isExpanded && (
+        <View style={{ paddingVertical: 10, gap: 10, alignItems: 'center' }}>
+          <Carousel
+            loop
+            autoPlay
+            autoPlayInterval={4000}
+            width={styles.imgDimensions.width}
+            height={styles.imgDimensions.height}
+            data={[detail.image]}
+            renderItem={CarouselImageItem}
+            style={{ paddingVertical: 10 }}
+          />
+        </View>
+      )}
+    </Card>
   );
 }
-
 function SolutionItemView({ detail }: { detail: SolutionType }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -219,39 +229,48 @@ function SolutionItemView({ detail }: { detail: SolutionType }) {
         <View style={{ paddingVertical: 10, gap: 10, alignItems: 'center' }}>
           <Carousel
             loop
+            autoPlay
+            autoPlayInterval={4000}
             width={styles.imgDimensions.width}
             height={styles.imgDimensions.height}
-            data={[_mockCauses[0].image] || detail.photos}
-            renderItem={CarouselRenderItemSolution}
+            data={detail.photos}
+            renderItem={CarouselImageItem}
             style={{ paddingVertical: 10 }}
           />
-          <View style={{ width: '100%' }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 15 }}>Ingredients</Text>
-            <View style={{ flexWrap: 'wrap', gap: 5, flexDirection: 'row' }}>
-              {detail.ingredients.map((i, _) => (
-                <View key={_} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Entypo name='dot-single' />
-                  <Text>{i}</Text>
+          {detail.ingredients.length > 0 && (
+            <View style={{ width: '100%' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 15 }}>Ingredients</Text>
+              <View
+                style={{
+                  flexWrap: 'wrap',
+                  gap: 5,
+                  flexDirection: 'row',
+                }}
+              >
+                {detail.ingredients.map((i, _) => (
+                  <View key={_} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Entypo name='dot-single' />
+                    <Text>{i}</Text>
+                  </View>
+                ))}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 5,
+                    borderRadius: 20,
+                    backgroundColor: '#aaaa',
+                    paddingHorizontal: 10,
+                    paddingVertical: 5,
+                    marginLeft: 'auto',
+                  }}
+                >
+                  <Text> Buy now</Text>
+                  <AntDesign name='shoppingcart' />
                 </View>
-              ))}
+              </View>
             </View>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-              borderRadius: 20,
-              backgroundColor: '#aaaa',
-              paddingHorizontal: 10,
-              paddingVertical: 5,
-              alignSelf: 'flex-end',
-            }}
-          >
-            <Text>Buy now</Text>
-            <AntDesign name='shoppingcart' />
-          </View>
-          <Text style={{ fontSize: 15, fontWeight: 'bold' }}>How to use?</Text>
+          )}
           <Text>{detail.description}</Text>
         </View>
       )}
@@ -262,3 +281,22 @@ function SolutionItemView({ detail }: { detail: SolutionType }) {
 function formattedName(i: string) {
   return i.split(' ').join('_').toLowerCase();
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: Dimensions.get('screen').height * 0.04,
+    paddingHorizontal: Dimensions.get('screen').width * 0.02,
+    height: '100%',
+    gap: 10,
+  },
+  imgDimensions: {
+    width: Dimensions.get('screen').width * 0.7,
+    height: Dimensions.get('screen').height * 0.3,
+  },
+  diseaseName: {
+    fontSize: 20,
+    alignSelf: 'center',
+    paddingVertical: 10,
+  },
+  solutionsContainer: { marginHorizontal: 1 },
+});

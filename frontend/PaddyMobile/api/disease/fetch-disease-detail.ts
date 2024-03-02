@@ -9,7 +9,7 @@ export default function useFetchDiseaseDetail({ id }: { id: string }) {
   const [fetching, setFetching] = useState(true);
   const { token } = useContext(AuthContext);
 
-  useEffect(() => {
+  const triggerFetch = () => {
     if (!token) return alert('Unauthorized action');
     fetcher({ uri: endpoints.disease, token, params: [['itemId', id]] })
       .then((r) => {
@@ -21,7 +21,11 @@ export default function useFetchDiseaseDetail({ id }: { id: string }) {
         console.error(e);
       })
       .finally(() => setFetching(false));
+  };
+
+  useEffect(() => {
+    triggerFetch();
   }, [id]);
 
-  return { detail, fetching };
+  return { detail, fetching, triggerFetch };
 }

@@ -2,7 +2,6 @@ import { uploader } from '@/api/driver';
 import endpoints from '@/constants/endpoints';
 import { AuthContext } from '@/contexts/auth/auth-provider';
 import {
-  ImagePickerOptions,
   MediaTypeOptions,
   launchCameraAsync,
   launchImageLibraryAsync,

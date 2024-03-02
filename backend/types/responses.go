@@ -12,11 +12,17 @@ type SolutionEntity struct {
 	Ingredients []string `json:"ingredients"`
 	Description string   `json:"description"`
 }
+type CausesEntity struct {
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
 
 type IdentifiedDiseaseEntity struct {
 	Id        string            `json:"id"`
 	Name      string            `json:"name"`
 	Solutions []*SolutionEntity `json:"solutions"`
+	Causes    []*CausesEntity   `json:"causes"`
 }
 
 type UploadedEntity struct {

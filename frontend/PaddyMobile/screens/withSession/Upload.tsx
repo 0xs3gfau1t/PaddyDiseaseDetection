@@ -21,7 +21,7 @@ export default function UploadScreen({ navigation }: any) {
     state: { fetching, data },
     triggerFetch,
   } = useFetchDiseases({ page, limit });
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, _setRefreshing] = useState(false);
 
   const renderStats = useMemo(() => {
     if (fetching)

@@ -26,6 +26,7 @@ export type LocationType = {
 };
 
 export type CausesType = {
+  id: string;
   name: string;
   image: string;
 };
@@ -55,9 +56,9 @@ export type UploadDetailType = {
     id: string;
     name: string;
     solutions: SolutionType[];
+    causes: CausesType[];
   }[];
   roi: string;
-  causes: CausesType[];
 };
 
 export type UploadListItemType = {
