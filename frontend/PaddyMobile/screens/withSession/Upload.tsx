@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   ScrollView,
+  RefreshControl,
   StyleSheet,
   Text,
   View,
@@ -20,6 +21,7 @@ export default function UploadScreen({ navigation }: any) {
     state: { fetching, data },
     triggerFetch,
   } = useFetchDiseases({ page, limit });
+  const [refreshing, setRefreshing] = useState(false);
 
   const renderStats = useMemo(() => {
     if (fetching)
@@ -59,7 +61,10 @@ export default function UploadScreen({ navigation }: any) {
       >
         Upload History
       </Text>
-      <ScrollView style={{ width: '100%', padding: 10, borderRadius: 20 }}>
+      <ScrollView
+        style={{ width: '100%', padding: 10, borderRadius: 20 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={triggerFetch} />}
+      >
         {data
           ? data.map((item) => <UploadItem item={item} key={item.id} navigation={navigation} />)
           : renderStats}
