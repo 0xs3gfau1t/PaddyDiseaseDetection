@@ -1,11 +1,18 @@
 import { useFetchUploaded } from '@/api/disease/fetch-diseases';
 import { STATUS } from '@/constants/misc';
 import pages from '@/constants/screens';
+import { UploadListItemType } from '@/types/misc';
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator, Card } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function UploadItem({ item, navigation }: any) {
+export default function UploadItem({
+  item,
+  navigation,
+}: {
+  item: UploadListItemType;
+  navigation: any;
+}) {
   const itemNew = useFetchUploaded({ id: item.id, item: item });
 
   let renderStatIcon = <ActivityIndicator />;
@@ -16,14 +23,21 @@ export default function UploadItem({ item, navigation }: any) {
 
   return (
     <Pressable onPress={() => navigation.navigate(pages.detail, { id: item.id })}>
-      <Card style={{ marginVertical: 5, width: '90%', alignSelf: 'center' }}>
+      <Card
+        style={{
+          marginVertical: 5,
+          width: '90%',
+          alignSelf: 'center',
+          backgroundColor: item.name && item.name.length > 0 ? '#f885' : '#afa5',
+        }}
+      >
         <View style={styles.historyItem}>
           <Image
             source={item.images ? { uri: item.images[0] } : require('@/assets/icons/tea.png')}
             style={styles.diseaseImage}
           />
-          <Text style={{ width: 160 }}>{itemNew.name}</Text>
-          <Text style={{ width: 20 }}>{itemNew.severity}</Text>
+          <Text style={{ width: 160 }}>{formatName(itemNew.name)}</Text>
+          <Text style={{ width: 20 }}>{formatSeverity(itemNew)}</Text>
           {renderStatIcon}
         </View>
       </Card>
@@ -52,3 +66,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
 });
+
+function formatName(name: string[] | null) {
+  if (!name) return 'No diseases detected';
+  return name.length === 1 ? name[0] : name[0] + ' + ' + (name.length - 1) + ' diseases ';
+}
+function formatSeverity(item: UploadListItemType) {
+  return item.name?.length && item.name.length > 0 ? item.severity : '';
+}

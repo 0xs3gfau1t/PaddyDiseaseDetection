@@ -49,3 +49,12 @@ export type UploadDetailType = {
   };
   causes: CausesType[];
 };
+
+export type UploadListItemType = {
+  id: string;
+  images: string[];
+  identified: string | null;
+  status: string;
+  severity: number;
+  name: string[] | null;
+};
