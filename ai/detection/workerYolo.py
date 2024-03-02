@@ -44,7 +44,7 @@ class Worker:
                         "color": "#%02x%02x%02x" % tuple(colors[classId]),
                     }
                 )
-        return json.dumps({"frames": r})
+        return json.dumps({"frames": r, "id": self.toIdentify})
 
     def __del__(self):
         if self.tempFile != None:
