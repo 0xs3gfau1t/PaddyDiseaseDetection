@@ -16,29 +16,29 @@ export default function HeatMap() {
         }}
         provider={PROVIDER_GOOGLE}
         style={{ flex: 1 }}
-          mapType="standard"
-        
-          nts && points.length > 0 && (
-            gleHeatMap
+        mapType='standard'
+      >
+        {points && points.length > 0 && (
+          <GoogleHeatMap
             points={points}
-              ient={{
+            gradient={{
               colors: ['#E50000', '#F29305', '#EEC20B', '#BBCF4C', '#79BC6A'],
               startPoints: [0.01, 0.25, 0.5, 0.75, 1],
-                colorMapSize: 256,
-              }}
-            ></GoogleHeatMap>
-          )}
-        </MapView>
-      </View>
-    );
+              colorMapSize: 256,
+            }}
+          ></GoogleHeatMap>
+        )}
+      </MapView>
+    </View>
+  );
 }
 
-  t styles = StyleSheet.create({
-    ainer: {
-      flex: 1,
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
   },
-     {
+  map: {
     width: '100%',
-      height: '100%',
-    },
+    height: '100%',
+  },
 });
