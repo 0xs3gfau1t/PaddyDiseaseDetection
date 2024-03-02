@@ -340,6 +340,7 @@ func (idiseaseCli IdentifiedDiseases) GetMapEntries() ([]types.HeatMapEntry, err
 	for _, entry := range data {
 		latitude, longitude, _ := location.ParseDbLocation(entry.Location)
 		response = append(response, types.HeatMapEntry{
+			Id:        entry.ID.String(),
 			Latitude:  latitude.ToFloat(),
 			Longitude: longitude.ToFloat(),
 			Weight:    entry.Severity,

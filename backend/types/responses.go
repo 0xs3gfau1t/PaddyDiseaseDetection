@@ -30,6 +30,7 @@ type UploadedEntity struct {
 }
 
 type HeatMapEntry struct {
+	Id        string  `json:"id"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Weight    int     `json:"weight"`
