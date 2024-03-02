@@ -2,6 +2,7 @@ import { BASE_API_URL } from '@env';
 const API_ROOT = `http://${BASE_API_URL}/api`;
 
 const endpoints = {
+  dashboard: `${API_ROOT}/dashboard`,
   auth: {
     root: `${API_ROOT}/auth`,
     signup: `${API_ROOT}/auth/signup`,
@@ -16,6 +17,7 @@ const endpoints = {
   uploadImage: `${API_ROOT}/upload`,
   diseases: `${API_ROOT}/uploads`,
   disease: `${API_ROOT}/upload`,
+  diseaseStat: `${API_ROOT}/uploadStat`,
 };
 
 export default endpoints;

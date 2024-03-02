@@ -120,6 +120,19 @@ var seedCmd = &cobra.Command{
 				}
 				log.Printf("Created solution %s", seedData.Disease[i].Solutions[j].Name)
 			}
+			for k := 0; k < len(seedData.Disease[i].Causes); k++ {
+				qb := client.Cause.Create()
+				qb.SetName(seedData.Disease[i].Causes[k].Name)
+				qb.SetImage(seedData.Disease[i].Causes[k].Image)
+				qb.AddDisease(d)
+				err := qb.Exec(ctx)
+				if err != nil {
+					log.Printf("Failed to create cause %s", seedData.Disease[i].Causes[k].Name)
+					log.Println(err)
+					continue
+				}
+				log.Printf("Created cause %s", seedData.Disease[i].Causes[k].Name)
+			}
 		}
 
 		return nil

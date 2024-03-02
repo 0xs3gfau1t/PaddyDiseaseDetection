@@ -67,3 +67,14 @@ export type UploadListItemType = {
   status: string;
   images: string[];
 };
+
+export type DashboardDataType = {
+  userName: string;
+  userSubmissions: number;
+  userDiseaseDetected: number;
+  creditsRemaining: number;
+  areaSubmissions: number;
+  areaDiseaseDetected: number;
+  expertsOnline: number;
+  expertsTotal: number;
+};

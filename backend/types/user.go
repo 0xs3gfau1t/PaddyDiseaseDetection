@@ -76,3 +76,14 @@ type ChangePassRequest struct {
 	OldPassword string `form:"oldPassword"`
 	NewPassword string `form:"newPassword"`
 }
+
+type DashboardData struct {
+	UserName            string `json:"userName"`
+	UserSubmissions     int    `json:"userSubmissions"`
+	UserDiseaseDetected int    `json:"userDiseaseDetected"`
+	CreditsRemaining    int    `json:"creditsRemaining"`
+	AreaSubmissions     int    `json:"areaSubmissions"`
+	AreaDiseaseDetected int    `json:"areaDiseaseDetected"`
+	ExpertsOnline       int    `json:"expertsOnline"`
+	ExpertsTotal        int    `json:"expertsTotal"`
+}

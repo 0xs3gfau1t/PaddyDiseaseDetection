@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"segFault/PaddyDiseaseDetection/ent"
+	"segFault/PaddyDiseaseDetection/ent/diseaseidentified"
 	"segFault/PaddyDiseaseDetection/ent/user"
 	"segFault/PaddyDiseaseDetection/pkg/location"
 	"segFault/PaddyDiseaseDetection/types"
@@ -27,6 +28,7 @@ type UserClient interface {
 	HashPassword(string) ([]byte, error)
 	CompareHashedPassword(string, string) error
 	Login(*types.LoginUserValidInput) (string, error)
+	GetDashboardData(*uuid.UUID) (*types.DashboardData, error)
 }
 
 type usercli struct {
@@ -148,4 +150,33 @@ func (u usercli) HashPassword(unhashed string) ([]byte, error) {
 
 func (u usercli) CompareHashedPassword(unhashed string, hashed string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(unhashed))
+}
+
+func (u usercli) GetDashboardData(userId *uuid.UUID) (*types.DashboardData, error) {
+	user, err := u.db.Get(context.Background(), *userId)
+	if err != nil {
+		return nil, fmt.Errorf("No user found with this id")
+	}
+
+	submissions := u.db.QueryDiseasesIdentified(user)
+	totalSubmissions, err := submissions.Count(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("Couldn't cound total submissions")
+	}
+
+	totalDetections, err := submissions.Where(diseaseidentified.HasDisease()).Count(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("Couldn't cound total detections")
+	}
+
+	return &types.DashboardData{
+		UserName:            user.Name,
+		UserSubmissions:     totalSubmissions,
+		UserDiseaseDetected: totalDetections,
+		CreditsRemaining:    115,
+		AreaSubmissions:     104,
+		AreaDiseaseDetected: 30,
+		ExpertsOnline:       14,
+		ExpertsTotal:        40,
+	}, nil
 }

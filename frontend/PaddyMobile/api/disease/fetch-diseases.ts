@@ -53,27 +53,31 @@ export default function useFetchDiseases({
 
 export function useFetchUploaded({ id, item }: { id: string; item: UploadListItemType }) {
   const [itemNew, setItemNew] = useState(item);
-  const [tick, setTick] = useState(0);
+  const [tick, setTick] = useState<number | null>(null);
 
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    if (itemNew.status !== STATUS.queued) return;
-    fetcher({
-      params: [['itemId', id]],
-      uri: endpoints.disease,
-      token: token as string,
-    })
-      .then((r) => {
-        if (r.success) setItemNew(r.data);
-        if (r.data.status === STATUS.queued) setTimeout(() => setTick(tick + 1), 1000);
-        else throw new Error();
+    if (item.status !== STATUS.queued) return;
+    const t = setInterval(() => {
+      fetcher({
+        params: [['itemId', id]],
+        uri: endpoints.diseaseStat,
+        token: token as string,
       })
-      .catch((e) => {
-        console.error(e);
-        setItemNew(item);
-      });
-  }, [tick]);
+        .then((r) => {
+          if (r.success) setItemNew((i) => ({ ...i, ...r.data }));
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }, 5000);
+    setTick(t);
+  }, []);
+
+  useEffect(() => {
+    if (tick !== null && itemNew.status !== STATUS.queued) clearInterval(tick);
+  }, [itemNew]);
 
   return itemNew;
 }
