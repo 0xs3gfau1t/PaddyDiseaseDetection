@@ -14,18 +14,18 @@ type SolutionEntity struct {
 }
 
 type IdentifiedDiseaseEntity struct {
-	Name string `json:"name"`
-	Id   string `json:"id"`
+	Name      string            `json:"name"`
+	Id        string            `json:"id"`
+	Solutions []*SolutionEntity `json:"solutions"`
 }
 
 type UploadedEntity struct {
-	Id         string                   `json:"id"`
-	Name       string                   `json:"name"`
-	Images     []string                 `json:"images"`
-	Severity   int                      `json:"severity"`
-	Status     string                   `json:"status"`
-	Solutions  []*SolutionEntity        `json:"solutions"`
-	Identified *IdentifiedDiseaseEntity `json:"identified"`
+	Id         string                     `json:"id"`
+	Name       []string                   `json:"name"`
+	Images     []string                   `json:"images"`
+	Severity   int                        `json:"severity"`
+	Status     string                     `json:"status"`
+	Identified []*IdentifiedDiseaseEntity `json:"identified"`
 }
 
 type HeatMapEntry struct {

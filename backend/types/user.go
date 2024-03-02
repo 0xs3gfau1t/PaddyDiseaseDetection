@@ -39,10 +39,16 @@ type PublishMessage struct {
 	Link string `json:"link"`
 }
 
+type FrameData struct {
+	Box        []float32 `json:"box"`
+	Confidence float32   `json:"conf"`
+	ClassId    int       `json:"classId"`
+	Name       string    `json:"name"`
+	Color      string    `json:"color"`
+}
+
 type ProcessedMessage struct {
-	Id      uuid.UUID `json:"id"`
-	Disease string    `json:"disease"`
-	Status  string    `json:"status"`
+	Frames []FrameData `json:"frames"`
 }
 
 type UserProfileData struct {

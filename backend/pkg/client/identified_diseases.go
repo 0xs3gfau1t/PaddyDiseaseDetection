@@ -137,6 +137,7 @@ func (idiseaseCli IdentifiedDiseases) UploadImages(images *types.ImageUploadType
 		MaxTries: 5,
 	}
 	if err := dbEntry.EntryDiseaseIdentified.Exec(context.Background()); err != nil {
+		log.Println(err)
 		log.Println("[x] Inserting to db failed")
 		go func() {
 			// idiseaseCli.db_insert_failed_channel <- *dbEntry
@@ -267,9 +268,9 @@ func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.U
 			}
 		}
 
-		diseaseName := "N/A"
-		if disease := uploadItem.Edges.Disease; disease != nil {
-			diseaseName = disease.Name
+		var diseaseName []string
+		for _, disease := range uploadItem.Edges.Disease {
+			diseaseName = append(diseaseName, disease.Name)
 		}
 
 		cleanedUploads = append(cleanedUploads, &types.UploadedEntity{
@@ -296,18 +297,13 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		}
 	}
 
-	var identified *types.IdentifiedDiseaseEntity
-	var solutions []*types.SolutionEntity
+	var identified []*types.IdentifiedDiseaseEntity
 
-	if disease := diseases.Edges.Disease; disease != nil {
-		identified = &types.IdentifiedDiseaseEntity{
-			Name: disease.Name,
-			Id:   disease.ID.String(),
-		}
-
+	for _, disease := range diseases.Edges.Disease {
+		var tmpSolution []*types.SolutionEntity
 		if solutionsFromDB, err := disease.QuerySolutions().All(context.Background()); err == nil {
 			for _, solutionFromDB := range solutionsFromDB {
-				solutions = append(solutions, &types.SolutionEntity{
+				tmpSolution = append(tmpSolution, &types.SolutionEntity{
 					Id:          solutionFromDB.ID.String(),
 					Name:        solutionFromDB.Name,
 					Photos:      solutionFromDB.Photos,
@@ -316,6 +312,11 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 				})
 			}
 		}
+		identified = append(identified, &types.IdentifiedDiseaseEntity{
+			Name:      disease.Name,
+			Id:        disease.ID.String(),
+			Solutions: tmpSolution,
+		})
 	}
 
 	cleanedUploads := types.UploadedEntity{
@@ -324,7 +325,6 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		Severity:   diseases.Severity,
 		Images:     imageLinks,
 		Identified: identified,
-		Solutions:  solutions,
 	}
 	return &cleanedUploads, nil
 }

@@ -60,13 +60,23 @@ func (m MlConsumer) Run() {
 func (m MlConsumer) UpdateStatus(ctx context.Context, msg *types.ProcessedMessage) error {
 	// TODO: Avaid setting status from processed to processing
 	// THis could happen due to network level race conditions
-	if id, err := m.FindDiseaseIdFromName(m.PrepareName(msg.Disease), ctx); err != nil {
-		return err
-	} else {
-		return m.dbDiseaseIdentified.Update().Where(diseaseidentified.ID(msg.Id)).SetDisease(&ent.Disease{
-			ID: *id,
-		}).SetStatus(diseaseidentified.Status(msg.Status)).Exec(ctx)
+	// TODO:Optimize Convert this loop to a single query
+	var updater *ent.DiseaseIdentifiedUpdate
+	for _, frameData := range msg.Frames {
+		if id, err := m.FindDiseaseIdFromName(m.PrepareName(frameData.Name), ctx); err != nil {
+			return err
+		} else {
+			updater = m.dbDiseaseIdentified.Update().Where(diseaseidentified.ID(*id)).AddDisease(
+				&ent.Disease{
+					ID: *id,
+				},
+			).SetStatus(diseaseidentified.Status("processed"))
+		}
 	}
+	if marshalledROI, err := json.Marshal(msg.Frames); err == nil {
+		return updater.SetRoi(string(marshalledROI)).Exec(ctx)
+	}
+	return nil
 }
 
 func (m MlConsumer) PrepareName(name string) string {

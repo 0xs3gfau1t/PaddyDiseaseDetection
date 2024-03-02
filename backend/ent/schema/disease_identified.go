@@ -20,12 +20,13 @@ func (DiseaseIdentified) Fields() []ent.Field {
 		field.Int("severity").Range(1, 10).Default(1),
 		field.Time("created_at").Default(time.Now),
 		field.Enum("status").Values("processing", "processed", "queued", "failed").Default("queued"),
+		field.String("roi").Optional(),
 	}
 }
 func (DiseaseIdentified) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("uploaded_by", User.Type).Unique().Required(),
-		edge.To("disease", Disease.Type).Unique(),
+		edge.To("disease", Disease.Type),
 		edge.From("image", Image.Type).Ref("disease_identified"),
 	}
 }
