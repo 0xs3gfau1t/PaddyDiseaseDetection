@@ -7,7 +7,7 @@ from pika.adapters.select_connection import SelectConnection
 from pika.channel import Channel
 from pika.connection import Connection
 from dotenv import load_dotenv
-from worker import Worker
+from detection.workerYolo import Worker
 
 load_dotenv()
 
