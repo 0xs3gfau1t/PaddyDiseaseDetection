@@ -2,7 +2,7 @@
 
 echo "Preparing dependencies"
 sudo apt-get update && sudo apt-get upgrade -y
-sudo apt-get install -y python3 python3-pip git
+sudo apt-get install -y python3 python3-pip git python3-opencv
 
 cd /home/$USER/paddydiseasedetection/ai
 sudo pip install -r requirements.txt --no-cache-dir
