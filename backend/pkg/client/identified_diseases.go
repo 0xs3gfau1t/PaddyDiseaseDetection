@@ -30,6 +30,7 @@ type IdentifiedDiseasesClient interface {
 	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
 	GetUploads(*uuid.UUID) ([]*types.UploadListItemType, error)
 	GetUpload(*uuid.UUID, *uuid.UUID) (*types.UploadedEntity, error)
+	GetUploadStat(*uuid.UUID, *uuid.UUID) (*types.UploadListItemType, error)
 	GetMapEntries() ([]types.HeatMapEntry, error)
 }
 
@@ -282,6 +283,35 @@ func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.U
 		})
 	}
 	return cleanedUploads, nil
+}
+
+func (idiseaseCli IdentifiedDiseases) GetUploadStat(user_id *uuid.UUID, uploadId *uuid.UUID) (*types.UploadListItemType, error) {
+	diseases, err := idiseaseCli.dbDiseaseIdentified.Query().WithDisease().WithImage().Where(diseaseidentified.HasUploadedByWith(user.ID(*user_id))).Where(diseaseidentified.ID(*uploadId)).First(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	imageLinks := make([]string, 0)
+	for _, image := range diseases.Edges.Image {
+		if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
+			imageLinks = append(imageLinks, imgLink)
+		}
+	}
+
+	name := make([]string, 0)
+
+	for _, disease := range diseases.Edges.Disease {
+		name = append(name, disease.Name)
+	}
+
+	cleanedUploads := types.UploadListItemType{
+		Id:       diseases.ID.String(),
+		Name:     name,
+		Status:   diseases.Status.String(),
+		Severity: diseases.Severity,
+		Images:   imageLinks,
+	}
+	return &cleanedUploads, nil
 }
 
 func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uuid.UUID) (*types.UploadedEntity, error) {

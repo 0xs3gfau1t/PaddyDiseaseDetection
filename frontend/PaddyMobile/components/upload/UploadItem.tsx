@@ -36,7 +36,9 @@ export default function UploadItem({
             source={item.images ? { uri: item.images[0] } : require('@/assets/icons/tea.png')}
             style={styles.diseaseImage}
           />
-          <Text style={{ width: 160 }}>{formatName(itemNew.name)}</Text>
+          <Text style={{ width: 160 }}>
+            {itemNew.name ? formatName(itemNew.name) : 'Processing...'}
+          </Text>
           <Text style={{ width: 20 }}>{item.severity}</Text>
           {renderStatIcon}
         </View>
