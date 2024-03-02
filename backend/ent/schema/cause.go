@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 type Cause struct {
@@ -12,12 +13,13 @@ type Cause struct {
 
 func (Cause) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique(),
+		field.UUID("id", uuid.New()).Unique(),
+		field.String("name"),
 		field.String("image"),
 	}
 }
 func (Cause) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("disease", Disease.Type),
+		edge.From("disease", Disease.Type).Ref("causes"),
 	}
 }

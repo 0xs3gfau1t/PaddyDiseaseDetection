@@ -122,6 +122,7 @@ var seedCmd = &cobra.Command{
 			}
 			for k := 0; k < len(seedData.Disease[i].Causes); k++ {
 				qb := client.Cause.Create()
+				qb.SetID(uuid.New())
 				qb.SetName(seedData.Disease[i].Causes[k].Name)
 				qb.SetImage(seedData.Disease[i].Causes[k].Image)
 				qb.AddDisease(d)

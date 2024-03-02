@@ -20,6 +20,7 @@ func (Disease) Fields() []ent.Field {
 func (Disease) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("solutions", Solution.Type),
+		edge.To("causes", Cause.Type),
 		edge.From("disease_identified", DiseaseIdentified.Type).Ref("disease"),
 		edge.From("image", Image.Type).Ref("disease"),
 	}
