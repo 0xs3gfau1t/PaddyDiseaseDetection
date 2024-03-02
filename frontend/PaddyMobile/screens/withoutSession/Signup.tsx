@@ -21,9 +21,12 @@ const SignupScreen: FC<NavProps> = ({ navigation }) => {
     if (info.password !== info.rePassword) return alert("Passwords doesn't match");
     else if (info.password.length < 0) return alert('Passwords must be 5 or more characters');
 
-    const { message } = await signUpPost(info);
+    const { message, success } = await signUpPost(info);
 
     alert(message);
+    if (success){
+      navigation.navigate(pages.login)
+    }
   }
 
   return (
