@@ -1,17 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { fetcher } from '../driver';
-import { FetchType } from '@/types/misc';
+import { FetchType, UploadListItemType } from '@/types/misc';
 import endpoints from '@/constants/endpoints';
 import { AuthContext } from '@/contexts/auth/auth-provider';
 import { STATUS } from '@/constants/misc';
-
-type ResponseType = {
-  id: string;
-  name: string;
-  severity: number;
-  status: string;
-  image: string;
-}[];
 
 export default function useFetchDiseases({
   page = 0,
@@ -20,7 +12,7 @@ export default function useFetchDiseases({
   page: number;
   limit: number;
 }) {
-  const [state, setState] = useState<FetchType<ResponseType>>({
+  const [state, setState] = useState<FetchType<UploadListItemType[]>>({
     fetching: true,
     data: null,
   });
@@ -59,14 +51,14 @@ export default function useFetchDiseases({
   return { state, triggerFetch };
 }
 
-export function useFetchUploaded({ id, item }: { id: string; item: any }) {
+export function useFetchUploaded({ id, item }: { id: string; item: UploadListItemType }) {
   const [itemNew, setItemNew] = useState(item);
   const [tick, setTick] = useState(0);
 
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    if (item.status !== STATUS.queued) return;
+    if (itemNew.status !== STATUS.queued) return;
     fetcher({
       params: [['itemId', id]],
       uri: endpoints.disease,

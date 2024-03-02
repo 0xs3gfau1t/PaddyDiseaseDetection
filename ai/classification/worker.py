@@ -23,7 +23,6 @@ class Worker:
 
             self.tempFile = fName
             disease = myPred(self.tempFile)
-            print("Predicted: ", disease)
         return json.dumps({"id": self.toIdentify, "disease": disease, "status": "processed"})
 
     def __del__(self):

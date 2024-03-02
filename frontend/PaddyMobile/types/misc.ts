@@ -37,15 +37,33 @@ export type SolutionType = {
   id: string;
 };
 
+export type ROI = {
+  box: number[];
+  conf: number;
+  classId: number;
+  name: string;
+  color: string;
+};
+
 export type UploadDetailType = {
   images: string[];
   severity: string;
   staus: string;
   id: string;
-  solutions: SolutionType[];
   identified: {
     name: string;
     id: string;
-  };
+    solutions: SolutionType[];
+  }[];
+  roi: string;
   causes: CausesType[];
+};
+
+export type UploadListItemType = {
+  id: string;
+  images: string[];
+  identified: string | null;
+  status: string;
+  severity: number;
+  name: string[] | null;
 };

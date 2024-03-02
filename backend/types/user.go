@@ -49,6 +49,7 @@ type FrameData struct {
 
 type ProcessedMessage struct {
 	Frames []FrameData `json:"frames"`
+	Id     uuid.UUID   `json:"id"`
 }
 
 type UserProfileData struct {
