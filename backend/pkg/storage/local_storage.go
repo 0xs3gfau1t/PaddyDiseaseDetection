@@ -10,9 +10,10 @@ import (
 
 type LocalStorage struct {
 	RootFolder string
+	ServerPath string
 }
 
-func NewLocalStorage(rootFilePath string) (*LocalStorage, error) {
+func NewLocalStorage(rootFilePath string, serverUrl string) (*LocalStorage, error) {
 	folderPath := path.Dir(rootFilePath)
 
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
@@ -21,11 +22,15 @@ func NewLocalStorage(rootFilePath string) (*LocalStorage, error) {
 
 	return &LocalStorage{
 		RootFolder: folderPath,
+		ServerPath: serverUrl,
 	}, nil
 }
 
 func (fs *LocalStorage) AddFile(filename string, buffer []byte) error {
 	filepath := path.Join(fs.RootFolder, filename)
+	if err := os.MkdirAll(path.Dir(filepath), 0770); err != nil {
+		return err
+	}
 
 	file, err := os.Create(filepath)
 	if err != nil {
@@ -62,5 +67,5 @@ func (fs *LocalStorage) GetFileByte(filename string) ([]byte, error) {
 }
 
 func (fs *LocalStorage) GetFilePath(filename string) (string, error) {
-	return path.Join(fs.RootFolder, filename), nil
+	return fmt.Sprintf("%v/%v", fs.ServerPath, filename), nil
 }

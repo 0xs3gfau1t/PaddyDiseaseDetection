@@ -37,7 +37,7 @@ export default function UploadItem({
             style={styles.diseaseImage}
           />
           <Text style={{ width: 160 }}>{formatName(itemNew.name)}</Text>
-          <Text style={{ width: 20 }}>{formatSeverity(itemNew)}</Text>
+          <Text style={{ width: 20 }}>{item.severity}</Text>
           {renderStatIcon}
         </View>
       </Card>
@@ -67,10 +67,6 @@ const styles = StyleSheet.create({
   },
 });
 
-function formatName(name: string[] | null) {
-  if (!name) return 'No diseases detected';
-  return name.length === 1 ? name[0] : name[0] + ' + ' + (name.length - 1) + ' diseases ';
-}
-function formatSeverity(item: UploadListItemType) {
-  return item.name?.length && item.name.length > 0 ? item.severity : '';
+function formatName(name: string[]) {
+  return name.length ? name.join(', ') : 'No Disease Detected';
 }

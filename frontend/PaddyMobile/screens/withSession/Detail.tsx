@@ -144,7 +144,7 @@ export default function DetailScreen() {
             ))}
           </View>
         </View>
-        <SolutionsView solutions={detail.identified[0].solutions} causes={detail.causes} />
+        <SolutionsView solutions={detail.identified[0]?.solutions || []} causes={detail.causes} />
       </ScrollView>
     );
 

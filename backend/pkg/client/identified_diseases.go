@@ -28,7 +28,7 @@ type IdentifiedDiseasesClient interface {
 	UploadImages(*types.ImageUploadType, *uuid.UUID, *http.Request) error
 	RollbackImageUploads([]string) error
 	RemoveIdentifiedDisease(uuid.UUID, uuid.UUID) error
-	GetUploads(*uuid.UUID) ([]*types.UploadedEntity, error)
+	GetUploads(*uuid.UUID) ([]*types.UploadListItemType, error)
 	GetUpload(*uuid.UUID, *uuid.UUID) (*types.UploadedEntity, error)
 	GetMapEntries() ([]types.HeatMapEntry, error)
 }
@@ -251,33 +251,33 @@ func (idiseaseCli IdentifiedDiseases) RemoveIdentifiedDisease(id uuid.UUID, user
 	return nil
 }
 
-func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.UploadedEntity, error) {
+func (idiseaseCli IdentifiedDiseases) GetUploads(user_id *uuid.UUID) ([]*types.UploadListItemType, error) {
 	diseases, err := idiseaseCli.dbDiseaseIdentified.Query().WithDisease().WithImage().Where(diseaseidentified.HasUploadedByWith(user.ID(*user_id))).All(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
-	var cleanedUploads []*types.UploadedEntity
+	var cleanedUploads []*types.UploadListItemType
 
 	for _, uploadItem := range diseases {
 
-		var imageLinks []string
+		imageLinks := make([]string, 0)
 		for _, image := range uploadItem.Edges.Image {
 			if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
 				imageLinks = append(imageLinks, imgLink)
 			}
 		}
 
-		var diseaseName []string
+		diseaseName := make([]string, 0)
 		for _, disease := range uploadItem.Edges.Disease {
 			diseaseName = append(diseaseName, disease.Name)
 		}
 
-		cleanedUploads = append(cleanedUploads, &types.UploadedEntity{
+		cleanedUploads = append(cleanedUploads, &types.UploadListItemType{
 			Id:       uploadItem.ID.String(),
 			Name:     diseaseName,
-			Status:   uploadItem.Status.String(),
 			Severity: uploadItem.Severity,
+			Status:   uploadItem.Status.String(),
 			Images:   imageLinks,
 		})
 	}
@@ -290,17 +290,18 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		return nil, err
 	}
 
-	var imageLinks []string
+	imageLinks := make([]string, 0)
 	for _, image := range diseases.Edges.Image {
 		if imgLink, err := idiseaseCli.storage.GetFilePath(image.Identifier); err == nil {
 			imageLinks = append(imageLinks, imgLink)
 		}
 	}
 
-	var identified []*types.IdentifiedDiseaseEntity
+	identified := make([]*types.IdentifiedDiseaseEntity, 0)
+	name := make([]string, 0)
 
 	for _, disease := range diseases.Edges.Disease {
-		var tmpSolution []*types.SolutionEntity
+		tmpSolution := make([]*types.SolutionEntity, 0)
 		if solutionsFromDB, err := disease.QuerySolutions().All(context.Background()); err == nil {
 			for _, solutionFromDB := range solutionsFromDB {
 				tmpSolution = append(tmpSolution, &types.SolutionEntity{
@@ -312,6 +313,7 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 				})
 			}
 		}
+		name = append(name, disease.Name)
 		identified = append(identified, &types.IdentifiedDiseaseEntity{
 			Name:      disease.Name,
 			Id:        disease.ID.String(),
@@ -321,6 +323,7 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 
 	cleanedUploads := types.UploadedEntity{
 		Id:         diseases.ID.String(),
+		Name:       name,
 		Status:     diseases.Status.String(),
 		Severity:   diseases.Severity,
 		Images:     imageLinks,
