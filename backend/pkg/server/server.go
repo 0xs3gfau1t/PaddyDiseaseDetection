@@ -8,7 +8,9 @@ import (
 func Run(port string) error {
 	e := echo.New()
 	e.Use(
-		middleware.Logger(),
+		middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: "[${method}] (${status}): ${uri} ${error}\n",
+		}),
 		middleware.Recover(),
 		middleware.CORS(),
 	)

@@ -130,6 +130,7 @@ func GetLocation(images *types.ImageUploadType, request *http.Request, userId uu
 		}
 		latitude, longitude, err := fileLE.GetLocation()
 		if err == nil {
+			log.Printf("[FileLocation]: %v %v\n", latitude, longitude)
 			return fmt.Sprintf("%f %f", latitude.ToFloat(), longitude.ToFloat())
 		}
 	}
@@ -139,6 +140,7 @@ func GetLocation(images *types.ImageUploadType, request *http.Request, userId uu
 	}
 	latitude, longitude, err := requestLE.GetLocation()
 	if err == nil {
+		log.Printf("[RequestLocation]: %v %v\n", latitude, longitude)
 		return fmt.Sprintf("%f %f", latitude.ToFloat(), longitude.ToFloat())
 	}
 
@@ -148,6 +150,7 @@ func GetLocation(images *types.ImageUploadType, request *http.Request, userId uu
 	}
 	latitude, longitude, err = userLE.GetLocation()
 	if err == nil {
+		log.Printf("[UserLocation]: %v %v\n", latitude, longitude)
 		return fmt.Sprintf("%f %f", latitude.ToFloat(), longitude.ToFloat())
 	}
 
