@@ -1,7 +1,8 @@
 import { BASE_API_URL } from '@env';
-const API_ROOT = `http://${BASE_API_URL}/api`;
+const API_ROOT = `http://192.168.1.73:3000/api`;
 
 const endpoints = {
+  dashboard: `${API_ROOT}/dashboard`,
   auth: {
     root: `${API_ROOT}/auth`,
     signup: `${API_ROOT}/auth/signup`,

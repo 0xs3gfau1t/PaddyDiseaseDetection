@@ -9,11 +9,11 @@ export default function AreaCard({
   areaDiseaseDetected: number;
 }) {
   const renderSeverity = useMemo(() => {
-    const calculatedSeverity = 0.6;
+    const calculatedSeverity = areaDiseaseDetected / areaSubmissions;
 
     if (calculatedSeverity > 0.6)
       return <Text style={{ ...styles.commonSevere, ...styles.severe }}>Severe</Text>;
-    else return <Text style={{ ...styles.commonSevere, ...styles.nonSevere }}>Severe</Text>;
+    else return <Text style={{ ...styles.commonSevere, ...styles.nonSevere }}>Not Severe</Text>;
   }, [areaDiseaseDetected, areaSubmissions]);
 
   return (

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 22,
-    width: 30,
+    width: 50,
     textAlign: 'right',
     fontWeight: '600',
   },
