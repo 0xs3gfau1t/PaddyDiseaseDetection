@@ -17,13 +17,6 @@ import Carousel from 'react-native-reanimated-carousel';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-const _mockCauses = [
-  {
-    name: 'Bacteria',
-    image:
-      'https://fastly.picsum.photos/id/620/200/300.jpg?hmac=ZLg-jrbFo8ASzAzQlxN4yMTNJJBpZtcpDXfwBxAvcT4',
-  },
-];
 function ROIBox({ roi, parentDim }: { roi: ROI; parentDim: { width: number; height: number } }) {
   return (
     <View
@@ -144,7 +137,10 @@ export default function DetailScreen() {
             ))}
           </View>
         </View>
-        <SolutionsView solutions={detail.identified[0]?.solutions || []} causes={detail.causes} />
+        <SolutionsView
+          solutions={detail.identified[0]?.solutions || []}
+          causes={detail.identified.map((i) => i.causes).flat()}
+        />
       </ScrollView>
     );
 
@@ -181,7 +177,7 @@ function SolutionsView({ solutions, causes }: { solutions: SolutionType[]; cause
           loop
           width={styles.imgDimensions.width}
           height={styles.imgDimensions.height}
-          data={_mockCauses}
+          data={causes}
           renderItem={CarouselRenderCauseItem}
         />
       </Card>
@@ -221,7 +217,7 @@ function SolutionItemView({ detail }: { detail: SolutionType }) {
             loop
             width={styles.imgDimensions.width}
             height={styles.imgDimensions.height}
-            data={[_mockCauses[0].image] || detail.photos}
+            data={detail.photos}
             renderItem={CarouselRenderItemSolution}
             style={{ paddingVertical: 10 }}
           />

@@ -17,6 +17,7 @@ type IdentifiedDiseaseEntity struct {
 	Id        string            `json:"id"`
 	Name      string            `json:"name"`
 	Solutions []*SolutionEntity `json:"solutions"`
+	Causes    []*CauseJson      `json:"causes"`
 }
 
 type UploadedEntity struct {

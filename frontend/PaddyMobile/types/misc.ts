@@ -55,9 +55,9 @@ export type UploadDetailType = {
     id: string;
     name: string;
     solutions: SolutionType[];
+    causes: CausesType[];
   }[];
   roi: string;
-  causes: CausesType[];
 };
 
 export type UploadListItemType = {
