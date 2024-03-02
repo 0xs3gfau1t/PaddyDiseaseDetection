@@ -4,6 +4,7 @@ import { fetcher } from './driver';
 import endpoints from '@/constants/endpoints';
 
 export type HeatmapPoint = {
+    id: number;
     latitude: number;
     longitude: number;
     weight: number;
