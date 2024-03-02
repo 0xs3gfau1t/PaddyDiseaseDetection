@@ -9,17 +9,6 @@ import { useContext } from 'react';
 import { AuthContext } from '@/contexts/auth/auth-provider';
 import { ActivityIndicator } from 'react-native-paper';
 
-const mockedData = {
-  userName: 'ThiccTsunade',
-  userSubmissions: 10,
-  userDiseaseDetected: 2,
-  creditsRemaining: 10,
-  areaSubmissions: 102,
-  areaDiseaseDetected: 20,
-  expertsOnline: 10,
-  expertsTotal: 20,
-};
-
 export default function DashboardScreen() {
   const { token, removeToken } = useContext(AuthContext);
   const { data, loading } = useGetDashboard(token);
@@ -49,13 +38,13 @@ export default function DashboardScreen() {
     <ScrollView>
       <View style={styles.container}>
         <WelcomeCard {...data} />
-        <AreaCard {...mockedData} />
+        <AreaCard {...data} />
         <View>
           <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Services</Text>
           <View style={styles.optionContainer}>
             <OptionCard
               icon={<FontAwesome6 name='user-doctor' size={40} />}
-              text={`${mockedData.expertsOnline}/${mockedData.expertsTotal} online`}
+              text={`${data.expertsOnline}/${data.expertsTotal} online`}
             />
             <OptionCard icon={<FontAwesome6 name='shop' size={40} />} text='Store' />
             <OptionCard icon={<Entypo name='video' size={40} />} text='Reels' />

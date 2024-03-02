@@ -161,12 +161,12 @@ func (u usercli) GetDashboardData(userId *uuid.UUID) (*types.DashboardData, erro
 	submissions := u.db.QueryDiseasesIdentified(user)
 	totalSubmissions, err := submissions.Count(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't cound total submissions")
+		return nil, fmt.Errorf("Couldn't count total submissions")
 	}
 
 	totalDetections, err := submissions.Where(diseaseidentified.HasDisease()).Count(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't cound total detections")
+		return nil, fmt.Errorf("Couldn't count total detections")
 	}
 
 	return &types.DashboardData{
