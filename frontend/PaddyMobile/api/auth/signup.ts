@@ -1,6 +1,8 @@
 import { TOKEN_HOLDER } from '@/constants/auth';
 import endpoints from '@/constants/endpoints';
+import { AuthContext } from '@/contexts/auth/auth-provider';
 import * as SecureStore from 'expo-secure-store';
+import { useContext } from 'react';
 
 export type SignUpProps = {
   email: string;
@@ -15,13 +17,14 @@ export type LoginProps = {
 };
 
 export async function signUpPost(info: SignUpProps) {
+  const { apiUrl } = useContext(AuthContext);
   try {
     const formData = new FormData();
     Object.entries(info).forEach(([key, val]) => {
       formData.append(key, val);
     });
 
-    const res = await fetch(endpoints.auth.signup, {
+    const res = await fetch(`${apiUrl}${endpoints.auth.signup}`, {
       method: 'POST',
       body: formData,
     });
@@ -36,13 +39,14 @@ export async function signUpPost(info: SignUpProps) {
 }
 
 export async function loginPost(info: LoginProps) {
+  const { apiUrl } = useContext(AuthContext);
   try {
     const formData = new FormData();
     Object.entries(info).forEach(([key, val]) => {
       formData.append(key, val);
     });
 
-    const res = await fetch(endpoints.auth.login, {
+    const res = await fetch(`${apiUrl}${endpoints.auth.login}`, {
       method: 'POST',
       body: formData,
     });

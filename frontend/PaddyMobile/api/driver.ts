@@ -1,4 +1,6 @@
+import { AuthContext } from '@/contexts/auth/auth-provider';
 import { FileSystemUploadType, uploadAsync } from 'expo-file-system';
+import { useContext } from 'react';
 
 export const fetcher = async ({
   params,
@@ -9,10 +11,11 @@ export const fetcher = async ({
   uri: string;
   token?: string;
 }) => {
+  const { apiUrl } = useContext(AuthContext);
   const paramsJoined = params
     ? params.reduce((prev, current) => prev + '&' + current[0] + '=' + current[1], '')
     : '';
-  return fetch(`${uri}?${paramsJoined}`, {
+  return fetch(`${apiUrl}${uri}?${paramsJoined}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -46,7 +49,8 @@ export const poster = async ({
   uri: string;
   token?: string;
 }) => {
-  return fetch(uri, {
+  const { apiUrl } = useContext(AuthContext);
+  return fetch(`${apiUrl}${uri}`, {
     method: 'POST',
     body: data,
     headers: {
@@ -82,7 +86,8 @@ export const patcher = async ({
   uri: string;
   token: string;
 }) => {
-  return fetch(uri, {
+  const { apiUrl } = useContext(AuthContext);
+  return fetch(`${apiUrl}${uri}`, {
     method: 'PATCH',
     body: data,
     headers: {
@@ -118,7 +123,8 @@ export const executioner = async ({
   uri: string;
   token: string;
 }) => {
-  return fetch(uri, {
+  const { apiUrl } = useContext(AuthContext);
+  return fetch(`${apiUrl}${uri}`, {
     method: 'DELETE',
     body: data,
     headers: {
@@ -151,7 +157,8 @@ export const uploader = async ({
   uri: string;
   token?: string;
 }) => {
-  return uploadAsync(uri, fileUri, {
+  const { apiUrl } = useContext(AuthContext);
+  return uploadAsync(`${apiUrl}${uri}`, fileUri, {
     httpMethod: 'POST',
     uploadType: FileSystemUploadType.MULTIPART,
     fieldName,
