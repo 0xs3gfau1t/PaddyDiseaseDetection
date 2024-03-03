@@ -16,6 +16,11 @@ const LandingScreen: FC<NavProps> = ({ navigation }) => {
           Get Started
         </Text>
       </View>
+      <View>
+        <Text onPress={() => navigation.navigate(pages.dev)}>
+          Settings
+        </Text>
+      </View>
     </View>
   );
 };

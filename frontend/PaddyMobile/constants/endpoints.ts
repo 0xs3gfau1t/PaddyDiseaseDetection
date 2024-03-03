@@ -1,23 +1,23 @@
-import { BASE_API_URL } from '@env';
-const API_ROOT = `http://${BASE_API_URL}/api`;
+// import { BASE_API_URL } from '@env';
+// const API_ROOT = `http://192.168.30.44:3000/api`;
 
 const endpoints = {
-  dashboard: `${API_ROOT}/dashboard`,
+  dashboard: `/dashboard`,
   auth: {
-    root: `${API_ROOT}/auth`,
-    signup: `${API_ROOT}/auth/signup`,
-    logout: `${API_ROOT}/auth/logout`,
-    login: `${API_ROOT}/auth/login`,
+    root: `/auth`,
+    signup: `/auth/signup`,
+    logout: `/auth/logout`,
+    login: `/auth/login`,
   },
   profile: {
-    root: `${API_ROOT}/profile`,
-    changePassword: `${API_ROOT}/profile/change_password`,
+    root: `/profile`,
+    changePassword: `/profile/change_password`,
   },
-  map: `${API_ROOT}/heatmap`,
-  uploadImage: `${API_ROOT}/upload`,
-  diseases: `${API_ROOT}/uploads`,
-  disease: `${API_ROOT}/upload`,
-  diseaseStat: `${API_ROOT}/uploadStat`,
+  map: `/heatmap`,
+  uploadImage: `/upload`,
+  diseases: `/uploads`,
+  disease: `/upload`,
+  diseaseStat: `/uploadStat`,
 };
 
 export default endpoints;

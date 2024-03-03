@@ -3,6 +3,7 @@ import pages from '../constants/screens';
 import LandingScreen from '@/screens/withoutSession/Landing';
 import SignupScreen from '@/screens/withoutSession/Signup';
 import LoginScreen from '@/screens/withoutSession/Login';
+import DevSettings from '@/screens/DevSettings';
 
 const Stack = createNativeStackNavigator();
 export default function NonAuthRoutes() {
@@ -15,6 +16,7 @@ export default function NonAuthRoutes() {
       />
       <Stack.Screen name={pages.signup} component={SignupScreen} options={{ headerShown: false }} />
       <Stack.Screen name={pages.login} component={LoginScreen} options={{ headerShown: false }} />
+      <Stack.Screen name={pages.dev} component={DevSettings} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

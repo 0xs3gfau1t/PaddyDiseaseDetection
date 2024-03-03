@@ -10,6 +10,8 @@ export const AuthContext = createContext<AuthContextType>({
   isFetching: true,
   token: null,
   userData: null,
+  apiUrl: "",
+  setApiUrl: (_url) => {},
   setToken: (_token) => {},
   removeToken: () => {},
 });
@@ -20,6 +22,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     token: null,
     userData: null,
   });
+
+  const [url, setUrl] = useState<string>("http://192.168.43.93:3000/api")
 
   useEffect(() => {
     const token = getItem(TOKEN_HOLDER);
@@ -43,7 +47,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setAuthState({ isFetching: false, token: null, userData: null });
   }
   return (
-    <AuthContext.Provider value={{ ...authState, setToken, removeToken }}>
+    <AuthContext.Provider value={{ ...authState, setToken, removeToken, apiUrl: url, setApiUrl: setUrl }}>
       {children}
     </AuthContext.Provider>
   );
