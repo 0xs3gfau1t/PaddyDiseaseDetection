@@ -26,6 +26,7 @@ export type LocationType = {
 };
 
 export type CausesType = {
+  id: string;
   name: string;
   image: string;
 };

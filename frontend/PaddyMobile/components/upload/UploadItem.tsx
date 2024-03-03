@@ -37,7 +37,7 @@ export default function UploadItem({
             style={styles.diseaseImage}
           />
           <Text style={{ width: 160 }}>
-            {itemNew.name ? formatName(itemNew.name) : 'Processing...'}
+            {itemNew.status == 'processed' ? formatName(itemNew.name) : 'Processing...'}
           </Text>
           <Text style={{ width: 20 }}>{item.severity}</Text>
           {renderStatIcon}

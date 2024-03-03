@@ -334,22 +334,33 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 		tmpSolution := make([]*types.SolutionEntity, 0)
 		if solutionsFromDB, err := disease.QuerySolutions().All(context.Background()); err == nil {
 			for _, solutionFromDB := range solutionsFromDB {
-				var signedPhotos []string
-				for _, p := range solutionFromDB.Photos {
-					signed, err := idiseaseCli.storage.GetFilePath(p)
-					if err != nil {
-						signed, err = idiseaseCli.storage.GetFilePath("default.jpeg")
+				solImages := make([]string, 0)
+				for _, image := range solutionFromDB.Photos {
+					if imgLink, err := idiseaseCli.storage.GetFilePath(image); err == nil {
+						solImages = append(solImages, imgLink)
 					}
-					signedPhotos = append(signedPhotos, signed)
 				}
 				tmpSolution = append(tmpSolution, &types.SolutionEntity{
 					Id:          solutionFromDB.ID.String(),
 					Name:        solutionFromDB.Name,
-					Photos:      signedPhotos,
+					Photos:      solImages,
 					Description: solutionFromDB.Description,
 					Ingredients: solutionFromDB.Ingredients,
 				})
 			}
+		}
+		tmpCauses := make([]*types.CausesEntity, 0)
+		if causesFromDB, err := disease.QueryCauses().All(context.Background()); err == nil {
+			for _, causeFromDB := range causesFromDB {
+				if img, err := idiseaseCli.storage.GetFilePath(causeFromDB.Image); err == nil {
+					tmpCauses = append(tmpCauses, &types.CausesEntity{
+						Id:    causeFromDB.ID.String(),
+						Name:  causeFromDB.Name,
+						Image: img,
+					})
+				}
+			}
+
 		}
 		name = append(name, disease.Name)
 		c, err := disease.QueryCauses().All(context.Background())
@@ -371,7 +382,7 @@ func (idiseaseCli IdentifiedDiseases) GetUpload(user_id *uuid.UUID, uploadId *uu
 			Name:      disease.Name,
 			Id:        disease.ID.String(),
 			Solutions: tmpSolution,
-			Causes:    causes,
+			Causes:    tmpCauses,
 		})
 	}
 
