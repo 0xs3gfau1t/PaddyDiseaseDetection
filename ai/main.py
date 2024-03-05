@@ -50,7 +50,7 @@ class Supervisor:
                                           )
 
         try:
-            self.mainLoop = threading.Thread(target=self.conn.ioloop.start, daemon=True)
+            self.mainLoop = threading.Thread(target=self.conn.ioloop.start)
         except KeyboardInterrupt:
             print("Closing connection")
             # Gracefully close the connection
@@ -67,7 +67,7 @@ class Supervisor:
     def onConnected(self, connection):
         connection.channel(on_open_callback=self.onChannelOpen)
 
-    def onConnectedError(self, conn:Connection, excep):
+    def onConnectedError(self, conn:Connection):
         print("Error connecting: ", conn)
 
     # Step #3
@@ -75,8 +75,9 @@ class Supervisor:
         """Called when our channel has opened"""
         self.channelConsumer = new_channel
         self.channelConsumer.queue_declare(queue=self.rabbitQueueConsumer, durable=True, exclusive=False, auto_delete=False, callback=self.onQueueDeclaredConsumer)
+        self.channelConsumer.queue_declare(queue=self.rabbitQueueProducer, durable=True, exclusive=False, auto_delete=False)
 
-    def onClose(self, connection, exception):
+    def onClose(self, connection):
         connection.ioloop.close()
 
     # Step #4
@@ -85,33 +86,35 @@ class Supervisor:
         self.channelConsumer.basic_consume(self.rabbitQueueConsumer, self.handleDelivery)
 
     # Step #5
-    def handleDelivery(self, channel:Channel, method, header, body):
+    def handleDelivery(self, channel: Channel, method, header: pika.BasicProperties, body: bytes):
         """Called when we receive a message from RabbitMQ"""
+        
+        self.workerThreadsLock.acquire()
+        threading.Thread(target=lambda : self.respond(body, method, channel)).start()
+
+    def respond(self, body: bytes, method, channel: Channel):
         try:
             parsedData = json.loads(bytes.decode(body, encoding='utf-8'))
             responseMessage = {"id": parsedData.get("id"), "disease": "unknown", "status": "processing"}
-            # self.respond(json.dumps(responseMessage))
+
+            try:
+                msg = Worker(parsedData).run()
+                self.workerThreadsLock.release()
+                channel.basic_ack(delivery_tag=method.delivery_tag) 
+                responseMessage = msg
+            except Exception as e:
+                print("Error: ", e)
+                responseMessage["status"] = "failed"
+                msg = json.dumps(responseMessage)
+
+            self.channelConsumer.basic_publish(
+                        body=msg,
+                        exchange="",
+                        routing_key=self.rabbitQueueProducer
+                        )
         except:
             print("Couldn't parse data")
             return
-
-        self.workerThreadsLock.acquire()
-        try:
-            self.respond(Worker(parsedData).run())
-        except Exception as e:
-            print("Error: ", e)
-            responseMessage["status"] = "failed"
-            self.respond(json.dumps(responseMessage))
-
-        self.workerThreadsLock.release()
-        channel.basic_ack(delivery_tag=method.delivery_tag)
-
-    def respond(self, msg:str):
-        self.channelConsumer.basic_publish(
-                body=msg,
-                exchange="",
-                routing_key=self.rabbitQueueProducer
-                )
 
     def monitor(self):
         while True:

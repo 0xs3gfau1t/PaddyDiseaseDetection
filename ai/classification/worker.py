@@ -2,7 +2,7 @@ import json
 import os
 import requests
 
-from paddyinference import myPred
+from .paddyinference import myPred
 
 class Worker:
     tempFile = None
